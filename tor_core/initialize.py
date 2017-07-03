@@ -11,7 +11,7 @@ from tor_core.helpers import get_wiki_page
 from tor_core.helpers import log_header
 
 
-def configure_tor(r, config):
+def configure_tor(config):
     """
     Assembles the tor object based on whether or not we've enabled debug mode
     and returns it. There's really no reason to put together a Subreddit
@@ -23,10 +23,10 @@ def configure_tor(r, config):
     :return: the Subreddit object for the chosen subreddit.
     """
     if config.debug_mode:
-        tor = r.subreddit('ModsOfToR')
+        tor = config.r.subreddit('ModsOfToR')
     else:
         # normal operation, our primary subreddit
-        tor = r.subreddit('transcribersofreddit')
+        tor = config.r.subreddit('transcribersofreddit')
 
     return tor
 
@@ -230,7 +230,7 @@ def build_bot(name, log_name='transcribersofreddit.log', require_redis=True):
         # I'm sorry
         config.redis = lambda: (_ for _ in ()).throw(NotImplementedError('Redis was disabled during building!'))
 
-    config.tor = configure_tor(r, config)
+    config.tor = configure_tor(config)
     initialize(config)
     logging.info('Bot built and initialized!')
     return config

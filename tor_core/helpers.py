@@ -1,12 +1,25 @@
 import logging
 import re
 import sys
+import time
 
 import prawcore
 import requests
 
 from tor_core import __version__
 from tor_core.strings import bot_footer
+from tor_core.config import config
+
+subreddit_regex = re.compile(
+    'reddit.com\/r\/([a-z0-9\-\_\+]+)',
+    flags=re.IGNORECASE
+)
+
+default_exceptions = (
+    prawcore.exceptions.RequestException,
+    prawcore.exceptions.ServerError,
+    prawcore.exceptions.Forbidden
+)
 
 
 def _(message):
@@ -80,11 +93,6 @@ def explode_gracefully(error, config, bot_name=None):
         'Please check Bugsnag for the complete error.'
     )
     sys.exit(1)
-
-subreddit_regex = re.compile(
-    'reddit.com\/r\/([a-z0-9\-\_\+]+)',
-    flags=re.IGNORECASE
-)
 
 
 def subreddit_from_url(url):
@@ -169,3 +177,23 @@ def update_wiki_page(pagename, content, config):
             '{} - Requested wiki page {} not found. '
             'Cannot update.'.format(e, pagename)
         )
+
+
+def run_until_dead(func, bot_name=None, exceptions=default_exceptions):
+    try:
+        while True:
+            try:
+                func(config)
+            except exceptions as e:
+                logging.warning(
+                    '{} - Issue communicating with Reddit. Sleeping for 60s!'
+                    ''.format(e)
+                )
+                time.sleep(60)
+
+    except KeyboardInterrupt:
+        logging.info('User triggered shutdown. Shutting down.')
+        sys.exit(0)
+
+    except Exception as e:
+        explode_gracefully(e, config, bot_name=bot_name)

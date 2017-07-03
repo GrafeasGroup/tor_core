@@ -1,3 +1,5 @@
+import os
+
 # Load configuration regardless of if bugsnag is setup correctly
 try:
     import bugsnag
@@ -138,7 +140,7 @@ class Config:
 try:
     Config.bugsnag_api_key = open('bugsnag.key').readline().strip()
 except OSError:
-    Config.bugsnag_api_key = None
+    Config.bugsnag_api_key = os.environ.get('BUGSNAG_API_KEY', None)
 
 if bugsnag and Config.bugsnag_api_key:
     bugsnag.configure(
@@ -149,7 +151,7 @@ if bugsnag and Config.bugsnag_api_key:
 try:
     Config.slack_api_url = open('slack.key').readline().strip()
 except OSError:
-    Config.slack_api_url = None
+    Config.slack_api_url = os.environ.get('SLACK_API_URL', None)
 
 
 # ----- Compatibility -----

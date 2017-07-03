@@ -1,10 +1,11 @@
 praw.ini
 *.pyc
 .idea/*
-archiver.log
-transcribersofreddit.log
-ocr.log
+*.log
 *.swp
 *.swo
 *.egg-info
 .eggs
+.cache/
+.idea/
+test/__pycache__/
