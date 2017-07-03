@@ -43,8 +43,6 @@ setup(
     install_requires=[
         'praw==4.4.0',
         'redis<3.0.0',
-        'addict',
-        'wget',
         'sh',
         'bugsnag',
         'pytest',
