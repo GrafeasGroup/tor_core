@@ -1,0 +1,10 @@
+praw.ini
+*.pyc
+.idea/*
+archiver.log
+transcribersofreddit.log
+ocr.log
+*.swp
+*.swo
+*.egg-info
+.eggs
