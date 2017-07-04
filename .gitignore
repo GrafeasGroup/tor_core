@@ -8,4 +8,4 @@ praw.ini
 .eggs
 .cache/
 .idea/
-test/__pycache__/
+__pycache__/
