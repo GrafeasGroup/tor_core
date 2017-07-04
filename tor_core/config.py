@@ -156,6 +156,9 @@ except OSError:
 
 # ----- Compatibility -----
 config = Config
+config.name = None
+config.bot_version = 0  # this should get overwritten by the bot process
+config.core_version = __version__
 config.video_domains = []
 config.audio_domains = []
 config.image_domains = []
@@ -175,3 +178,6 @@ config.tor_mods = []
 
 # section for gifs
 config.no_gifs = []
+
+# enables debug information for the cherrypy heartbeat server
+config.heartbeat_logging = False

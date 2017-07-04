@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
-import os
 import codecs
+import os
+
 from setuptools import (
     setup,
     find_packages,
 )
+
 from tor_core import __version__
 
 
@@ -48,5 +50,6 @@ setup(
         'sh',
         'bugsnag',
         'pytest',
+        'cherrypy',
     ]
 )

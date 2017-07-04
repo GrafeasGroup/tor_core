@@ -1,4 +1,5 @@
 import logging
+import random
 import sys
 
 import redis
@@ -6,6 +7,7 @@ from bugsnag.handlers import BugsnagHandler
 from praw import Reddit
 
 from tor_core.config import config
+from tor_core.heartbeat import configure_heartbeat
 from tor_core.helpers import clean_list
 from tor_core.helpers import get_wiki_page
 from tor_core.helpers import log_header
@@ -211,17 +213,60 @@ def initialize(config):
     logging.debug('Gifs loaded.')
 
 
-def build_bot(name, log_name='transcribersofreddit.log', require_redis=True):
+def get_heartbeat_port(config):
+    """
+    Attempts to pull an existing port number from the filesystem, and if it
+    doesn't find one then it generates the port number and saves it to a key
+    file.
+
+    :param config: the global config object
+    :return: int; the port number to use.
+    """
+    try:
+        # have we already reserved a port for this process?
+        port = int(open('heartbeat.port', 'r').readline().strip())
+        logging.debug('Found existing port saved on disk')
+        return port
+    except OSError:
+        pass
+
+    while True:
+        port = random.randrange(40000, 40200)  # is 200 ports too much?
+        if config.redis.sismember('active_heartbeat_ports', port) == 0:
+            config.redis.sadd('active_heartbeat_ports', port)
+
+            # create that file we looked for earlier
+            port_file = open('heartbeat.port', 'w')
+            port_file.write(str(port))
+            port_file.close()
+            logging.debug('generated port {} and saved to disk'.format(port))
+
+            return port
+
+
+def build_bot(
+    name,
+    version,
+    full_name=None,
+    log_name='transcribersofreddit.log',
+    require_redis=True,
+    heartbeat_logging=False
+):
     """
     Shortcut for setting up a bot instance. Runs all configuration and returns
     a valid config object.
 
     :param name: The name of the bot to be started; this name must match the
         settings in praw.ini
+    :param version: the string of the version number
     :return: a generated config object
     """
 
     config.r = Reddit(name)
+    # this is used to power messages, so please add a full name if you can
+    config.name = full_name if full_name else name
+    config.bot_version = version
+    config.heartbeat_logging = heartbeat_logging
     configure_logging(config, log_name=log_name)
 
     if require_redis:
@@ -232,5 +277,11 @@ def build_bot(name, log_name='transcribersofreddit.log', require_redis=True):
 
     config.tor = configure_tor(config)
     initialize(config)
+
+    if require_redis:
+        # we want this to run after the config object is created
+        # and for this version, heartbeat requires db access
+        config.heartbeat_port = get_heartbeat_port(config)
+        configure_heartbeat(config)
+
     logging.info('Bot built and initialized!')
-    return config
