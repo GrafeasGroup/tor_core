@@ -1,12 +1,36 @@
 #!/usr/bin/env python
 
-import os
 import codecs
+import os
+import sys
+
 from setuptools import (
     setup,
     find_packages,
 )
+from setuptools.command.test import test as TestCommand
+
 from tor_core import __version__
+
+
+class PyTest(TestCommand):
+    # From: https://stackoverflow.com/a/43924004/1236035
+    user_options = [('pytest-args=', 'a', "Arguments to pass into py.test")]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.pytest_args = []
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pytest
+
+        errno = pytest.main(self.pytest_args)
+        sys.exit(errno)
 
 
 def long_description():
@@ -20,7 +44,7 @@ def long_description():
 setup(
     name='tor_core',
     version=__version__,
-    description='',
+    description='Core functionality used across /r/TranscribersOfReddit bots',
     long_description=long_description(),
     url='https://github.com/transcribersofreddit/tor_core',
     author='Joe Kaufeld',
@@ -29,7 +53,7 @@ setup(
     classifiers=[
         'Development Status :: 1 - Planning',
 
-        'Intended Audience :: End Users/Desktop',
+        'Intended Audience :: Developers',
         'Topic :: Communications :: BBS',
 
         'License :: OSI Approved :: MIT License',
@@ -46,5 +70,6 @@ setup(
         'sh',
         'bugsnag',
         'pytest',
-    ]
+    ],
+    cmdclass={'test': PyTest}
 )

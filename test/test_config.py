@@ -1,5 +1,3 @@
-import unittest
-
 import pytest
 
 from tor_core.config import config as SITE_CONFIG
@@ -11,6 +9,7 @@ def test_read_secrets_from_filesystem():
     '''
     assert SITE_CONFIG.bugsnag_api_key is not None
     assert SITE_CONFIG.slack_api_url is not None
+
 
 def test_config_structure():
     '''Config singleton is structured as expected
@@ -43,7 +42,3 @@ def test_config_structure():
 
     assert type(SITE_CONFIG.slack_api_url) is str or \
         SITE_CONFIG.slack_api_url is None
-
-
-if __name__ == '__main__':
-    unittest.main()
