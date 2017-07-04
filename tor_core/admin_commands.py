@@ -11,6 +11,7 @@ import sh
 def from_moderator(reply, config):
     return reply.author in config.tor_mods
 
+
 # XXX: THIS DOES NOT WORK
 # but I'm including it anyways because it will be useful if we fix it.
 def update_and_restart(reply, config):
