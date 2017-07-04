@@ -256,10 +256,17 @@ def build_bot(
     Shortcut for setting up a bot instance. Runs all configuration and returns
     a valid config object.
 
-    :param name: The name of the bot to be started; this name must match the
-        settings in praw.ini
-    :param version: the string of the version number
-    :return: a generated config object
+    :param name: string; The name of the bot to be started; this name must
+        match the settings in praw.ini
+    :param version: string; the version number for the current bot being run
+    :param full_name: string; the descriptive name of the current bot being
+        run; this is used for the heartbeat and status
+    :param log_name: string; the name to be used for the log file on disk. No
+        spaces.
+    :param require_redis: bool; triggers the creation of the Redis instance.
+        Any bot that does not require use of Redis can set this to False and
+        not have it crash on start because Redis isn't running.
+    :return: None
     """
 
     config.r = Reddit(name)
