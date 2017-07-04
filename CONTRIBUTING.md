@@ -42,12 +42,12 @@ clear. Any feedback is helpful here!
 
 ### Writing tests
 
-Tests are written using `unittest` because it is sufficient for our needs at this time and
-it is part of the standard library in Python. We invoke the full test suite by calling
-`bin/run test`.
+Tests are written using `pytest` because it is sufficient for our needs at this time, it has
+a nicer console output than `unittest`, and it integrates well with CodeCov. We invoke the
+full test suite by calling `bin/run test`.
 
 At the moment, the test suite should run very quickly, but that won't always be the case.
-Running individual tests with `python path/to/test/file.py` is also acceptable while
+Running individual tests with `pytest path/to/test/file.py` is also acceptable while
 actively developing. Note that a pull request should always have a fully passing test suite.
 
 ## Pull Requests

@@ -8,4 +8,7 @@ praw.ini
 .eggs
 .cache/
 .idea/
-test/__pycache__/
+__pycache__/
+heartbeat.port
+slack.key
+bugsnag.key
