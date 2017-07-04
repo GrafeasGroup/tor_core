@@ -1,0 +1,11 @@
+praw.ini
+*.pyc
+.idea/*
+*.log
+*.swp
+*.swo
+*.egg-info
+.eggs
+.cache/
+.idea/
+__pycache__/
