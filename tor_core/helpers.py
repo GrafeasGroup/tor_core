@@ -214,17 +214,13 @@ def run_until_dead(func, exceptions=default_exceptions):
     communication issues with Reddit, timeouts, and handles CTRL+C and
     unexpected crashes.
 
-    :param func: the function that you want to run; this will automatically be
+    :param func: The function that you want to run; this will automatically be
         passed the config object. Historically, this is the only thing needed
         to start a bot.
     :param exceptions: A tuple of exception classes to guard against. These are
-        the praw connection exceptions by default; things like timeouts and
-        general connection errors, but they can be overridden with your own
-        set of exceptions if you feel it necessary.
-    :return: None. When this returns, everything necessary has been processed
-        to allow the bot to die. Set `run_until_dead()` as the last line under
-        if __name__ == '__main__' and the bot will exit cleanly after this
-        returns.
+        a set of PRAW connection errors (timeouts and general connection
+        issues) but they can be overridden with a passed-in set.
+    :return: None.
     """
     try:
         while True:

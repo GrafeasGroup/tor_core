@@ -224,7 +224,8 @@ def get_heartbeat_port(config):
     """
     try:
         # have we already reserved a port for this process?
-        port = int(open('heartbeat.port', 'r').readline().strip())
+        with open('heartbeat.port', 'r') as port_file:
+            port = int(port_file.readline().strip())
         logging.debug('Found existing port saved on disk')
         return port
     except OSError:
@@ -236,9 +237,8 @@ def get_heartbeat_port(config):
             config.redis.sadd('active_heartbeat_ports', port)
 
             # create that file we looked for earlier
-            port_file = open('heartbeat.port', 'w')
-            port_file.write(str(port))
-            port_file.close()
+            with open('heartbeat.port', 'w') as port_file:
+                port_file.write(str(port))
             logging.debug('generated port {} and saved to disk'.format(port))
 
             return port

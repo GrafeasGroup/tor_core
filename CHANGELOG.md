@@ -5,9 +5,9 @@ means we will never make a backwards-incompatible change within a major version 
 
 ## v0.2.0
 
-- added Cherrypy server hooks into `build_bot()` and `run_until_dead()` to create a json endpoint for use as a heartbeat check (by @itsthejoker)
+- Added heartbeat web service to check status of a bot (by @itsthejoker)
 
 ## v0.1.0
 
-- created first version of tor_core from parts of u/ToR (by @itsthejoker)
-- added in basic testing suite
+- Created first version of tor_core from parts of u/ToR (by @itsthejoker)
+- Added in basic testing suite
