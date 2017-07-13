@@ -70,6 +70,7 @@ setup(
         'sh',
         'bugsnag',
         'pytest',
+        'cherrypy',
     ],
     cmdclass={'test': PyTest}
 )

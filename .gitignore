@@ -1,6 +1,4 @@
 praw.ini
-*.pyc
-.idea/*
 *.log
 *.swp
 *.swo
@@ -9,3 +7,5 @@ praw.ini
 .cache/
 .idea/
 __pycache__/
+heartbeat.port
+*.key
