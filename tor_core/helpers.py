@@ -10,6 +10,7 @@ from tor_core import __version__
 from tor_core.config import config
 from tor_core.heartbeat import stop_heartbeat_server
 from tor_core.strings import bot_footer
+from addict import Dict
 
 subreddit_regex = re.compile(
     'reddit.com\/r\/([a-z0-9\-\_\+]+)',
@@ -21,6 +22,21 @@ default_exceptions = (
     prawcore.exceptions.ServerError,
     prawcore.exceptions.Forbidden
 )
+
+flair = Dict()
+flair.unclaimed = 'Unclaimed'
+flair.summoned_unclaimed = 'Summoned - Unclaimed'
+flair.completed = 'Completed!'
+flair.in_progress = 'In Progress'
+flair.meta = 'Meta'
+flair.disregard = 'Disregard'
+
+css_flair = Dict()
+css_flair.unclaimed = 'unclaimed'
+css_flair.completed = 'transcriptioncomplete'
+css_flair.in_progress = 'inprogress'
+css_flair.meta = 'meta'
+css_flair.disregard = 'disregard'
 
 
 def _(message):

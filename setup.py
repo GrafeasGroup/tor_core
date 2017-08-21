@@ -65,12 +65,13 @@ setup(
     packages=find_packages(exclude=['test*', 'bin/*']),
     test_suite='test',
     install_requires=[
-        'praw==4.4.0',
+        'praw==5.0.1',
         'redis<3.0.0',
         'sh',
         'bugsnag',
         'pytest',
         'cherrypy',
+        'addict'
     ],
     cmdclass={'test': PyTest}
 )
