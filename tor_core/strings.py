@@ -7,3 +7,5 @@ bot_footer = (
     "compose?to=%2Fr%2FTranscribersOfReddit&subject=Bot%20Question"
     "&message=)"
 )
+
+reddit_url = 'https://reddit.com{}'
