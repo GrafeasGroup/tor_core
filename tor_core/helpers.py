@@ -154,40 +154,49 @@ def get_parent_post_id(post, r):
             return r.submission(id=clean_id(post.parent_id))
 
 
-def get_wiki_page(pagename, config, return_on_fail=None):
+def get_wiki_page(pagename, config, return_on_fail=None, subreddit=None):
     """
     Return the contents of a given wiki page.
 
     :param pagename: String. The name of the page to be requested.
-    :param tor: Active ToR instance.
+    :param config: Dict. Global config object.
     :param return_on_fail: Any value to return when nothing is found
         at the requested page. This allows us to specify returns for
         easier work in debug mode.
+    :param subreddit: Object. A specific PRAW Subreddit object if we
+        want to interact with a different sub.
     :return: String or None. The content of the requested page if
         present else None.
     """
+    if not subreddit:
+        subreddit = config.tor
     logging.debug('Retrieving wiki page {}'.format(pagename))
     try:
-        result = config.tor.wiki[pagename].content_md
+        result = subreddit.wiki[pagename].content_md
         return result if result != '' else return_on_fail
     except prawcore.exceptions.NotFound:
         return return_on_fail
 
 
-def update_wiki_page(pagename, content, config):
+def update_wiki_page(pagename, content, config, subreddit=None):
     """
     Sends new content to the requested wiki page.
 
     :param pagename: String. The name of the page to be edited.
     :param content: String. New content for the wiki page.
-    :param tor: Active ToR instance.
+    :param config: Dict. Global config object.
+    :param subreddit: Object. A specific PRAW Subreddit object if we
+        want to interact with a different sub.
     :return: None.
     """
 
     logging.debug('Updating wiki page {}'.format(pagename))
 
+    if not subreddit:
+        subreddit = config.tor
+
     try:
-        return config.tor.wiki[pagename].edit(content)
+        return subreddit.wiki[pagename].edit(content)
     except prawcore.exceptions.NotFound as e:
         logging.error(
             '{} - Requested wiki page {} not found. '
