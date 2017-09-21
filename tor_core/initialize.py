@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 import sys
 
@@ -41,7 +42,8 @@ def configure_redis():
     :return: object: the active Redis object.
     """
     try:
-        redis_server = redis.StrictRedis(host='localhost', port=6379, db=0)
+        url = os.getenv('REDIS_CONNECTION_URL', 'redis://localhost:6379')
+        redis_server = redis.StrictRedis.from_url(url, db=0)
         redis_server.ping()
     except redis.exceptions.ConnectionError:
         logging.fatal("Redis server is not running! Exiting!")
