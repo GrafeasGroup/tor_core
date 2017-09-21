@@ -5,15 +5,15 @@ from tor_core.config import config as SITE_CONFIG
 
 @pytest.mark.skip
 def test_read_secrets_from_filesystem():
-    '''Secret data has been read from the filesystem
-    '''
+    """Secret data has been read from the filesystem
+    """
     assert SITE_CONFIG.bugsnag_api_key is not None
     assert SITE_CONFIG.slack_api_url is not None
 
 
 def test_config_structure():
-    '''Config singleton is structured as expected
-    '''
+    """Config singleton is structured as expected
+    """
     assert type(SITE_CONFIG.video_domains) is list
     assert type(SITE_CONFIG.audio_domains) is list
     assert type(SITE_CONFIG.image_domains) is list
