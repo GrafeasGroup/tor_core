@@ -1,3 +1,4 @@
+import logging
 import os
 
 # Load configuration regardless of if bugsnag is setup correctly
@@ -9,6 +10,51 @@ except ImportError:
     bugsnag = None
 
 from tor_core import __version__
+
+
+_missing = object()
+
+
+# @see https://stackoverflow.com/a/17487613/1236035
+class cached_property(object):
+    """A decorator that converts a function into a lazy property.  The
+    function wrapped is called the first time to retrieve the result
+    and then that calculated result is used the next time you access
+    the value::
+
+        class Foo(object):
+
+            @cached_property
+            def foo(self):
+                # calculate something important here
+                return 42
+
+    The class has to have a `__dict__` in order for this property to
+    work.
+    """
+
+    # implementation detail: this property is implemented as non-data
+    # descriptor.  non-data descriptors are only invoked if there is
+    # no entry with the same name in the instance's __dict__.
+    # this allows us to completely get rid of the access function call
+    # overhead.  If one choses to invoke __get__ by hand the property
+    # will still work as expected because the lookup logic is replicated
+    # in __get__ for manual invocation.
+
+    def __init__(self, func, name=None, doc=None):
+        self.__name__ = name or func.__name__
+        self.__module__ = func.__module__
+        self.__doc__ = doc or func.__doc__
+        self.func = func
+
+    def __get__(self, obj, type=None):
+        if obj is None:
+            return self
+        value = obj.__dict__.get(self.__name__, _missing)
+        if value is _missing:
+            value = self.func(obj)
+            obj.__dict__[self.__name__] = value
+        return value
 
 
 class BaseConfig:
@@ -92,7 +138,7 @@ class DefaultSubreddit(Subreddit):
     """
 
 
-class Config:
+class Config(object):
     """
     A singleton object for checking global configuration from
     anywhere in the application
@@ -136,6 +182,24 @@ class Config:
     # for the OCR bot
     OCR = True
 
+    @cached_property
+    def redis(self):
+        """
+        Lazy-loaded redis connection
+        """
+        from redis import StrictRedis
+        import redis.exceptions
+
+        try:
+            url = os.environ.get('REDIS_CONNECTION_URL',
+                                 'redis://localhost:6379')
+            conn = StrictRedis.from_url(url, db=0)
+            conn.ping()
+        except redis.exceptions.ConnectionError:
+            logging.fatal("Redis server is not running")
+            raise
+        return conn
+
 
 try:
     Config.bugsnag_api_key = open('bugsnag.key').readline().strip()
@@ -155,7 +219,7 @@ except OSError:
 
 
 # ----- Compatibility -----
-config = Config
+config = Config()
 config.name = None
 config.bot_version = '0.0.0'  # this should get overwritten by the bot process
 config.core_version = __version__

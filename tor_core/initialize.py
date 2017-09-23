@@ -278,11 +278,9 @@ def build_bot(
     config.heartbeat_logging = heartbeat_logging
     configure_logging(config, log_name=log_name)
 
-    if require_redis:
-        config.redis = configure_redis()
-    else:
+    if not require_redis:
         # I'm sorry
-        config.redis = lambda: (_ for _ in ()).throw(NotImplementedError('Redis was disabled during building!'))
+        type(config).redis = property(lambda x: (_ for _ in ()).throw(NotImplementedError('Redis was disabled during building!')))
 
     config.tor = configure_tor(config)
     initialize(config)
