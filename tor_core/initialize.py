@@ -282,13 +282,11 @@ def build_bot(
         # I'm sorry
         type(config).redis = property(lambda x: (_ for _ in ()).throw(NotImplementedError('Redis was disabled during building!')))
 
-    config.tor = configure_tor(config)
     initialize(config)
 
     if require_redis:
         # we want this to run after the config object is created
         # and for this version, heartbeat requires db access
-        config.heartbeat_port = get_heartbeat_port(config)
         configure_heartbeat(config)
 
     logging.info('Bot built and initialized!')

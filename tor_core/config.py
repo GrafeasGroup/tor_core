@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 
 # Load configuration regardless of if bugsnag is setup correctly
 try:
@@ -182,6 +183,11 @@ class Config(object):
     # for the OCR bot
     OCR = True
 
+    # Name of the bot
+    name = None
+    bot_version = '0.0.0'  # this should get overwritten by the bot process
+    heartbeat_logging = False
+
     @cached_property
     def redis(self):
         """
@@ -199,6 +205,34 @@ class Config(object):
             logging.fatal("Redis server is not running")
             raise
         return conn
+
+    @cached_property
+    def tor(self):
+        if self.debug_mode:
+            return self.r.subreddit('ModsOfTor')
+        else:
+            return self.r.subreddit('transcribersofreddit')
+
+    @cached_property
+    def heartbeat_port(self):
+        try:
+            with open('heartbeat.port', 'r') as port_file:
+                port = int(port_file.readline().strip())
+            logging.debug('Found existing port saved on disk')
+            return port
+        except OSError:
+            pass
+
+        while True:
+            port = random.randrange(40000, 40200)  # is 200 ports too much?
+            if self.redis.sismember('active_heartbeat_ports', port) == 0:
+                self.redis.sadd('active_heartbeat_ports', port)
+
+                with open('heartbeat.port', 'w') as port_file:
+                    port_file.write(str(port))
+                logging.debug('generated port {} and saved to disk'.format(port))
+
+                return port
 
 
 try:
@@ -220,8 +254,6 @@ except OSError:
 
 # ----- Compatibility -----
 config = Config()
-config.name = None
-config.bot_version = '0.0.0'  # this should get overwritten by the bot process
 config.core_version = __version__
 config.video_domains = []
 config.audio_domains = []
