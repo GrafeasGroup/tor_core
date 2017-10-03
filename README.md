@@ -13,6 +13,7 @@ When initializing the new bot, all you have to do is call `build_bot()` and then
 ## Example
 
 ```python
+from tor_core.config import config
 from tor_core.initialize import build_bot
 from tor_core.helpers import run_until_dead
 

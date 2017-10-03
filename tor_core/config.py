@@ -35,12 +35,12 @@ class cached_property(object):
     """
 
     # implementation detail: this property is implemented as non-data
-    # descriptor.  non-data descriptors are only invoked if there is
-    # no entry with the same name in the instance's __dict__.
-    # this allows us to completely get rid of the access function call
-    # overhead.  If one choses to invoke __get__ by hand the property
-    # will still work as expected because the lookup logic is replicated
-    # in __get__ for manual invocation.
+    # descriptor. non-data descriptors are only invoked if there is no
+    # entry with the same name in the instance's __dict__. this allows
+    # us to completely get rid of the access function call overhead. If
+    # one choses to invoke __get__ by hand the property will still work
+    # as expected because the lookup logic is replicated in __get__ for
+    # manual invocation.
 
     def __init__(self, func, name=None, doc=None):
         self.__name__ = name or func.__name__
@@ -198,8 +198,8 @@ class Config(object):
 
         try:
             url = os.environ.get('REDIS_CONNECTION_URL',
-                                 'redis://localhost:6379')
-            conn = StrictRedis.from_url(url, db=0)
+                                 'redis://localhost:6379/0')
+            conn = StrictRedis.from_url(url)
             conn.ping()
         except redis.exceptions.ConnectionError:
             logging.fatal("Redis server is not running")
