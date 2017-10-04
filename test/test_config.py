@@ -1,19 +1,21 @@
 import pytest
 
+import redis.exceptions
+
 from tor_core.config import config as SITE_CONFIG
 
 
 @pytest.mark.skip
 def test_read_secrets_from_filesystem():
-    '''Secret data has been read from the filesystem
-    '''
+    """Secret data has been read from the filesystem
+    """
     assert SITE_CONFIG.bugsnag_api_key is not None
     assert SITE_CONFIG.slack_api_url is not None
 
 
 def test_config_structure():
-    '''Config singleton is structured as expected
-    '''
+    """Config singleton is structured as expected
+    """
     assert type(SITE_CONFIG.video_domains) is list
     assert type(SITE_CONFIG.audio_domains) is list
     assert type(SITE_CONFIG.image_domains) is list
@@ -42,3 +44,16 @@ def test_config_structure():
 
     assert type(SITE_CONFIG.slack_api_url) is str or \
         SITE_CONFIG.slack_api_url is None
+
+
+def test_redis_config_property():
+    try:
+        assert SITE_CONFIG.redis, 'Does not observe lazy loader'
+    except redis.exceptions.ConnectionError:
+        pass
+
+    # Check stubbing with derivations of BaseException
+    type(SITE_CONFIG).redis = property(lambda x: (_ for _ in ()).throw(NotImplementedError('Redis was disabled')))
+
+    with pytest.raises(NotImplementedError):
+        SITE_CONFIG.redis.ping()

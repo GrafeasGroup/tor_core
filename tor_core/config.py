@@ -1,4 +1,6 @@
+import logging
 import os
+import random
 
 # Load configuration regardless of if bugsnag is setup correctly
 try:
@@ -9,6 +11,51 @@ except ImportError:
     bugsnag = None
 
 from tor_core import __version__
+
+
+_missing = object()
+
+
+# @see https://stackoverflow.com/a/17487613/1236035
+class cached_property(object):
+    """A decorator that converts a function into a lazy property.  The
+    function wrapped is called the first time to retrieve the result
+    and then that calculated result is used the next time you access
+    the value::
+
+        class Foo(object):
+
+            @cached_property
+            def foo(self):
+                # calculate something important here
+                return 42
+
+    The class has to have a `__dict__` in order for this property to
+    work.
+    """
+
+    # implementation detail: this property is implemented as non-data
+    # descriptor. non-data descriptors are only invoked if there is no
+    # entry with the same name in the instance's __dict__. this allows
+    # us to completely get rid of the access function call overhead. If
+    # one choses to invoke __get__ by hand the property will still work
+    # as expected because the lookup logic is replicated in __get__ for
+    # manual invocation.
+
+    def __init__(self, func, name=None, doc=None):
+        self.__name__ = name or func.__name__
+        self.__module__ = func.__module__
+        self.__doc__ = doc or func.__doc__
+        self.func = func
+
+    def __get__(self, obj, type=None):
+        if obj is None:
+            return self
+        value = obj.__dict__.get(self.__name__, _missing)
+        if value is _missing:
+            value = self.func(obj)
+            obj.__dict__[self.__name__] = value
+        return value
 
 
 class BaseConfig:
@@ -92,7 +139,7 @@ class DefaultSubreddit(Subreddit):
     """
 
 
-class Config:
+class Config(object):
     """
     A singleton object for checking global configuration from
     anywhere in the application
@@ -136,6 +183,57 @@ class Config:
     # for the OCR bot
     OCR = True
 
+    # Name of the bot
+    name = None
+    bot_version = '0.0.0'  # this should get overwritten by the bot process
+    heartbeat_logging = False
+
+    @cached_property
+    def redis(self):
+        """
+        Lazy-loaded redis connection
+        """
+        from redis import StrictRedis
+        import redis.exceptions
+
+        try:
+            url = os.environ.get('REDIS_CONNECTION_URL',
+                                 'redis://localhost:6379/0')
+            conn = StrictRedis.from_url(url)
+            conn.ping()
+        except redis.exceptions.ConnectionError:
+            logging.fatal("Redis server is not running")
+            raise
+        return conn
+
+    @cached_property
+    def tor(self):
+        if self.debug_mode:
+            return self.r.subreddit('ModsOfTor')
+        else:
+            return self.r.subreddit('transcribersofreddit')
+
+    @cached_property
+    def heartbeat_port(self):
+        try:
+            with open('heartbeat.port', 'r') as port_file:
+                port = int(port_file.readline().strip())
+            logging.debug('Found existing port saved on disk')
+            return port
+        except OSError:
+            pass
+
+        while True:
+            port = random.randrange(40000, 40200)  # is 200 ports too much?
+            if self.redis.sismember('active_heartbeat_ports', port) == 0:
+                self.redis.sadd('active_heartbeat_ports', port)
+
+                with open('heartbeat.port', 'w') as port_file:
+                    port_file.write(str(port))
+                logging.debug('generated port {} and saved to disk'.format(port))
+
+                return port
+
 
 try:
     Config.bugsnag_api_key = open('bugsnag.key').readline().strip()
@@ -155,9 +253,7 @@ except OSError:
 
 
 # ----- Compatibility -----
-config = Config
-config.name = None
-config.bot_version = '0.0.0'  # this should get overwritten by the bot process
+config = Config()
 config.core_version = __version__
 config.video_domains = []
 config.audio_domains = []

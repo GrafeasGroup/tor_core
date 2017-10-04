@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 import sys
 
@@ -41,7 +42,8 @@ def configure_redis():
     :return: object: the active Redis object.
     """
     try:
-        redis_server = redis.StrictRedis(host='localhost', port=6379, db=0)
+        url = os.getenv('REDIS_CONNECTION_URL', 'redis://localhost:6379/0')
+        redis_server = redis.StrictRedis.from_url(url)
         redis_server.ping()
     except redis.exceptions.ConnectionError:
         logging.fatal("Redis server is not running! Exiting!")
@@ -276,19 +278,15 @@ def build_bot(
     config.heartbeat_logging = heartbeat_logging
     configure_logging(config, log_name=log_name)
 
-    if require_redis:
-        config.redis = configure_redis()
-    else:
+    if not require_redis:
         # I'm sorry
-        config.redis = lambda: (_ for _ in ()).throw(NotImplementedError('Redis was disabled during building!'))
+        type(config).redis = property(lambda x: (_ for _ in ()).throw(NotImplementedError('Redis was disabled during building!')))
 
-    config.tor = configure_tor(config)
     initialize(config)
 
     if require_redis:
         # we want this to run after the config object is created
         # and for this version, heartbeat requires db access
-        config.heartbeat_port = get_heartbeat_port(config)
         configure_heartbeat(config)
 
     logging.info('Bot built and initialized!')
