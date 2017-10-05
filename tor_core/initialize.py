@@ -6,6 +6,7 @@ import sys
 import redis
 from bugsnag.handlers import BugsnagHandler
 from praw import Reddit
+from raven import Client
 
 from tor_core.config import config
 from tor_core.heartbeat import configure_heartbeat
@@ -77,6 +78,18 @@ def configure_logging(config, log_name='transcribersofreddit.log'):
         logging.info('Bugsnag enabled!')
     else:
         logging.info('Not running with Bugsnag!')
+
+    if config.sentry_api_url:
+        # All we have to do is create the client object in order to start
+        # sending things to Sentry. We're saving the client object here though
+        # so that we can use it for specific things in the future if we ever
+        # want to.
+        config.sentry = Client(config.sentry_api_url)
+
+    if config.sentry_api_url:
+        logging.info('Sentry enabled!')
+    else:
+        logging.info('Not running with Sentry!')
 
     log_header('Starting!')
 

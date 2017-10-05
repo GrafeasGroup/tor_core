@@ -69,7 +69,8 @@ setup(
         'bugsnag',
         'pytest',
         'cherrypy',
-        'addict'
+        'addict',
+        'raven',  # Sentry client
     ],
     cmdclass={'test': PyTest}
 )
