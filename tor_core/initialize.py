@@ -73,8 +73,6 @@ def configure_logging(config, log_name='transcribersofreddit.log'):
         bs_handler = BugsnagHandler()
         bs_handler.setLevel(logging.ERROR)
         logging.getLogger('').addHandler(bs_handler)
-
-    if config.bugsnag_api_key:
         logging.info('Bugsnag enabled!')
     else:
         logging.info('Not running with Bugsnag!')
@@ -85,8 +83,6 @@ def configure_logging(config, log_name='transcribersofreddit.log'):
         # so that we can use it for specific things in the future if we ever
         # want to.
         config.sentry = Client(config.sentry_api_url)
-
-    if config.sentry_api_url:
         logging.info('Sentry enabled!')
     else:
         logging.info('Not running with Sentry!')
