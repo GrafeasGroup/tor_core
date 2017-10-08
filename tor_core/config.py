@@ -111,6 +111,16 @@ class ImageConfig(BaseConfig):
     """
 
 
+class OtherContentConfig(BaseConfig):
+    """
+    Media-specific configuration class for any content that does not
+    fit in with the above media types. Articles, mostly.
+
+    Initialization should pull from the appropriate Reddit Wiki
+    page and fill in the proper values.
+    """
+
+
 class Subreddit:
     """
     Subreddit-specific configurations
@@ -153,6 +163,7 @@ class Config(object):
         'audio': AudioConfig(),
         'video': VideoConfig(),
         'image': ImageConfig(),
+        'other': OtherContentConfig(),
     }
 
     # List of mods of ToR, fetched later using PRAW
@@ -162,6 +173,7 @@ class Config(object):
     # subreddit-specific rules
     subreddits = []
     subreddits_to_check = []
+    subreddits_domain_filter_bypass = []
 
     # API keys for later overwriting based on contents of filesystem
     bugsnag_api_key = None
@@ -234,7 +246,6 @@ class Config(object):
                 logging.debug('generated port {} and saved to disk'.format(port))
 
                 return port
-
 
 try:
     Config.bugsnag_api_key = open('bugsnag.key').readline().strip()

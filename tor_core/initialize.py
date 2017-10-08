@@ -106,10 +106,12 @@ def populate_formatting(config):
     config.audio_formatting = ''
     config.video_formatting = ''
     config.image_formatting = ''
+    config.other_formatting = ''
 
     config.audio_formatting = get_wiki_page('format/audio', config)
     config.video_formatting = get_wiki_page('format/video', config)
     config.image_formatting = get_wiki_page('format/images', config)
+    config.image_formatting = get_wiki_page('format/other', config)
 
 
 def populate_domain_lists(config):
@@ -181,6 +183,18 @@ def populate_subreddit_lists(config):
     logging.debug(
         'Retrieved subreddits subject to the upvote filter: {}'.format(
             config.upvote_filter_subs
+        )
+    )
+
+    config.subreddits_domain_filter_bypass = get_wiki_page(
+        'subreddits/domain-filter-bypass', config
+    ).split('\r\n')
+    config.subreddits_domain_filter_bypass = clean_list(
+        config.subreddits_domain_filter_bypass
+    )
+    logging.debug(
+        'Retrieved subreddits that bypass the domain filter: {}'.format(
+            config.subreddits_domain_filter_bypass
         )
     )
 
