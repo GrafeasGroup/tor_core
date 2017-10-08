@@ -111,7 +111,7 @@ def populate_formatting(config):
     config.audio_formatting = get_wiki_page('format/audio', config)
     config.video_formatting = get_wiki_page('format/video', config)
     config.image_formatting = get_wiki_page('format/images', config)
-    config.image_formatting = get_wiki_page('format/other', config)
+    config.other_formatting = get_wiki_page('format/other', config)
 
 
 def populate_domain_lists(config):
