@@ -7,6 +7,10 @@ means we will never make a backwards-incompatible change within a major version 
 
 Nothing currently...
 
+## v0.3.0 (2017-10-08)
+
+- Adds support for pulling all submissions from specific subreddits
+
 ## v0.2.1 (2017-10-04)
 
 - Added Sentry logging support (@itsthejoker)
