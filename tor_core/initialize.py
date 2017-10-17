@@ -5,6 +5,8 @@ import sys
 
 import redis
 from bugsnag.handlers import BugsnagHandler
+from raven.handlers.logging import SentryHandler
+from raven.conf import setup_logging
 from praw import Reddit
 from raven import Client
 
@@ -78,11 +80,11 @@ def configure_logging(config, log_name='transcribersofreddit.log'):
         logging.info('Not running with Bugsnag!')
 
     if config.sentry_api_url:
-        # All we have to do is create the client object in order to start
-        # sending things to Sentry. We're saving the client object here though
-        # so that we can use it for specific things in the future if we ever
-        # want to.
-        config.sentry = Client(config.sentry_api_url)
+        sentry_handler = SentryHandler(Client(config.sentry_api_url))
+        sentry_handler.setLevel(logging.ERROR)
+        # I don't know what this line does but it seems required by raven
+        setup_logging(sentry_handler)
+        logging.getLogger('').addHandler(sentry_handler)
         logging.info('Sentry enabled!')
     else:
         logging.info('Not running with Sentry!')
