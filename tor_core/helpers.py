@@ -267,6 +267,10 @@ def run_until_dead(func, exceptions=default_exceptions):
                 func(config)
             except praw.exceptions.APIException as e:
                 if e.error_type == 'RATELIMIT':
+                    logging.warning(
+                        'Ratelimit - artificially limited by Reddit. Sleeping'
+                        ' for requested time!'
+                    )
                     handle_rate_limit(e)
             except exceptions as e:
                 logging.warning(
