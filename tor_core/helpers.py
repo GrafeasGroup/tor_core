@@ -4,6 +4,7 @@ import sys
 import time
 
 import prawcore
+import praw
 import requests
 
 from tor_core import __version__
@@ -38,6 +39,8 @@ css_flair.in_progress = 'inprogress'
 css_flair.meta = 'meta'
 css_flair.disregard = 'disregard'
 
+# error message for an API timeout
+_pattern = re.compile('again in (?P<number>[0-9]+) (?P<unit>\w+)s?\.$', re.IGNORECASE)
 
 def _(message):
     """
@@ -232,6 +235,17 @@ def stop_heartbeat(config):
     logging.info('Stopped heartbeat!')
 
 
+def handle_rate_limit(exc):
+    time_map = {
+        'second': 1,
+        'minute': 60,
+        'hour': 60 * 60,
+    }
+    matches = re.search(_pattern, exc.message)
+    delay = matches[0] * time_map[matches[1]]
+    time.sleep(delay + 1)
+
+
 def run_until_dead(func, exceptions=default_exceptions):
     """
     The official method that replaces all that ugly boilerplate required to
@@ -251,6 +265,9 @@ def run_until_dead(func, exceptions=default_exceptions):
         while True:
             try:
                 func(config)
+            except praw.exceptions.APIException as e:
+                if e.error_type == 'RATELIMIT':
+                    handle_rate_limit(e)
             except exceptions as e:
                 logging.warning(
                     '{} - Issue communicating with Reddit. Sleeping for 60s!'
