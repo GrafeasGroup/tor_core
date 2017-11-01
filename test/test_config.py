@@ -16,33 +16,33 @@ def test_read_secrets_from_filesystem():
 def test_config_structure():
     """Config singleton is structured as expected
     """
-    assert type(SITE_CONFIG.video_domains) is list
-    assert type(SITE_CONFIG.audio_domains) is list
-    assert type(SITE_CONFIG.image_domains) is list
+    assert isinstance(SITE_CONFIG.video_domains, list)
+    assert isinstance(SITE_CONFIG.audio_domains, list)
+    assert isinstance(SITE_CONFIG.image_domains, list)
 
-    assert type(SITE_CONFIG.video_formatting) is str
-    assert type(SITE_CONFIG.audio_formatting) is str
-    assert type(SITE_CONFIG.image_formatting) is str
+    assert isinstance(SITE_CONFIG.video_formatting, str)
+    assert isinstance(SITE_CONFIG.audio_formatting, str)
+    assert isinstance(SITE_CONFIG.image_formatting, str)
 
-    assert type(SITE_CONFIG.header) is str
+    assert isinstance(SITE_CONFIG.header, str)
 
-    assert type(SITE_CONFIG.subreddits_to_check) is list
-    assert type(SITE_CONFIG.upvote_filter_subs) is dict
-    assert type(SITE_CONFIG.no_link_header_subs) is list
+    assert isinstance(SITE_CONFIG.subreddits_to_check, list)
+    assert isinstance(SITE_CONFIG.upvote_filter_subs, dict)
+    assert isinstance(SITE_CONFIG.no_link_header_subs, list)
 
-    assert type(SITE_CONFIG.tor_mods) is list
+    assert isinstance(SITE_CONFIG.tor_mods, list)
 
-    assert type(SITE_CONFIG.perform_header_check) is bool
-    assert type(SITE_CONFIG.debug_mode) is bool
+    assert isinstance(SITE_CONFIG.perform_header_check, bool)
+    assert isinstance(SITE_CONFIG.debug_mode, bool)
 
-    assert type(SITE_CONFIG.no_gifs) is list
+    assert isinstance(SITE_CONFIG.no_gifs, list)
 
-    assert type(SITE_CONFIG.OCR) is bool
+    assert isinstance(SITE_CONFIG.OCR, bool)
 
-    assert type(SITE_CONFIG.bugsnag_api_key) is str or \
+    assert isinstance(SITE_CONFIG.bugsnag_api_key, str) or \
         SITE_CONFIG.bugsnag_api_key is None
 
-    assert type(SITE_CONFIG.slack_api_url) is str or \
+    assert isinstance(SITE_CONFIG.slack_api_url, str) or \
         SITE_CONFIG.slack_api_url is None
 
 

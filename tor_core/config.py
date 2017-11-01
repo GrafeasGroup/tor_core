@@ -48,7 +48,7 @@ class cached_property(object):
         self.__doc__ = doc or func.__doc__
         self.func = func
 
-    def __get__(self, obj, type=None):
+    def __get__(self, obj, _type=None):
         if obj is None:
             return self
         value = obj.__dict__.get(self.__name__, _missing)
@@ -246,6 +246,7 @@ class Config(object):
                 logging.debug('generated port {} and saved to disk'.format(port))
 
                 return port
+
 
 try:
     Config.bugsnag_api_key = open('bugsnag.key').readline().strip()

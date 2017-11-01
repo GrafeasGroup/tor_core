@@ -140,7 +140,9 @@ def populate_domain_lists(config):
             current_domain_list = config.audio_domains
         elif domainset.startswith('images'):
             current_domain_list = config.image_domains
-        [current_domain_list.append(x) for x in domain_list]
+
+        current_domain_list += domain_list
+        # [current_domain_list.append(x) for x in domain_list]
         logging.debug('Domain list populated: {}'.format(current_domain_list))
 
 

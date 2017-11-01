@@ -1,5 +1,6 @@
 import codecs
 import os
+import shlex
 import sys
 
 from setuptools import (
@@ -17,7 +18,7 @@ class PyTest(TestCommand):
 
     def initialize_options(self):
         TestCommand.initialize_options(self)
-        self.pytest_args = []
+        self.pytest_args = '--cov=tor_core'
 
     def finalize_options(self):
         TestCommand.finalize_options(self)
@@ -27,7 +28,7 @@ class PyTest(TestCommand):
     def run_tests(self):
         import pytest
 
-        errno = pytest.main(self.pytest_args)
+        errno = pytest.main(shlex.split(self.pytest_args))
         sys.exit(errno)
 
 
@@ -39,12 +40,22 @@ def long_description():
         return f.read()
 
 
+test_deps = [
+    'pytest',
+    'pytest-cov',
+    'addict',
+]
+dev_helper_deps = [
+    'better-exceptions',
+]
+
+
 setup(
     name='tor_core',
     version=__version__,
     description='Core functionality used across /r/TranscribersOfReddit bots',
     long_description=long_description(),
-    url='https://github.com/transcribersofreddit/tor_core',
+    url='https://github.com/TranscribersOfReddit/tor_core',
     author='Joe Kaufeld',
     author_email='joe.kaufeld@gmail.com',
     license='MIT',
@@ -60,17 +71,20 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     keywords='',
-    packages=find_packages(exclude=['test*', 'bin/*']),
+    packages=find_packages(exclude=['test.*', '*.test.*', '*.test', 'test']),
+    zip_safe=True,
+    cmdclass={'test': PyTest},
     test_suite='test',
+    extras_require={
+        'dev': test_deps + dev_helper_deps,
+    },
+    tests_require=test_deps,
     install_requires=[
         'praw==5.0.1',
         'redis<3.0.0',
         'sh',
-        'bugsnag',
-        'pytest',
         'cherrypy',
-        'addict',
+        'bugsnag',
         'raven',  # Sentry client
     ],
-    cmdclass={'test': PyTest}
 )
