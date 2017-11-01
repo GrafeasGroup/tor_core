@@ -5,7 +5,11 @@ means we will never make a backwards-incompatible change within a major version 
 
 ## _[UNRELEASED]_
 
-Nothing currently...
+- Able to bypass domain filters (@itsthejoker)
+- Adds support for better API rate limiting from Reddit (@itsthejoker)
+- Removes `./bin` scripts in favor of Makefile (dev-only) (@thelonelyghost)
+- Adds TravisCI support (@thelonelyghost)
+- Removes `addict` dependency (@thelonelyghost)
 
 ## v0.3.0 (2017-10-08)
 

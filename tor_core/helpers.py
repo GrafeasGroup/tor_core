@@ -11,7 +11,11 @@ from tor_core import __version__
 from tor_core.config import config
 from tor_core.heartbeat import stop_heartbeat_server
 from tor_core.strings import bot_footer
-from addict import Dict
+
+
+class Object(object):
+    pass
+
 
 subreddit_regex = re.compile(
     'reddit.com\/r\/([a-z0-9\-\_\+]+)',
@@ -24,7 +28,7 @@ default_exceptions = (
     prawcore.exceptions.Forbidden
 )
 
-flair = Dict()
+flair = Object()
 flair.unclaimed = 'Unclaimed'
 flair.summoned_unclaimed = 'Summoned - Unclaimed'
 flair.completed = 'Completed!'
@@ -32,7 +36,7 @@ flair.in_progress = 'In Progress'
 flair.meta = 'Meta'
 flair.disregard = 'Disregard'
 
-css_flair = Dict()
+css_flair = Object()
 css_flair.unclaimed = 'unclaimed'
 css_flair.completed = 'transcriptioncomplete'
 css_flair.in_progress = 'inprogress'
@@ -41,6 +45,7 @@ css_flair.disregard = 'disregard'
 
 # error message for an API timeout
 _pattern = re.compile('again in (?P<number>[0-9]+) (?P<unit>\w+)s?\.$', re.IGNORECASE)
+
 
 def _(message):
     """
