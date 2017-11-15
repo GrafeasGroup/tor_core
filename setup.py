@@ -54,7 +54,7 @@ setup(
     version=__version__,
     description='Core functionality used across /r/TranscribersOfReddit bots',
     long_description=long_description(),
-    url='https://github.com/TranscribersOfReddit/tor_core',
+    url='https://github.com/GrafeasGroup/tor_core',
     author='Joe Kaufeld',
     author_email='joe.kaufeld@gmail.com',
     license='MIT',
