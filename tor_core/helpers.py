@@ -79,7 +79,7 @@ def clean_list(items):
     return cleaned
 
 
-def send_to_slack(message, channel='#general', config):
+def send_to_slack(message, channel="#general", config):
     """
     Sends a message to the ToR slack.
 
