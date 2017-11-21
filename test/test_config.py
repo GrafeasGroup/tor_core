@@ -10,7 +10,7 @@ def test_read_secrets_from_filesystem():
     """Secret data has been read from the filesystem
     """
     assert SITE_CONFIG.bugsnag_api_key is not None
-    assert SITE_CONFIG.slack_api_url is not None
+    assert SITE_CONFIG.slack_api_key is not None
 
 
 def test_config_structure():
@@ -42,8 +42,8 @@ def test_config_structure():
     assert isinstance(SITE_CONFIG.bugsnag_api_key, str) or \
         SITE_CONFIG.bugsnag_api_key is None
 
-    assert isinstance(SITE_CONFIG.slack_api_url, str) or \
-        SITE_CONFIG.slack_api_url is None
+    assert isinstance(SITE_CONFIG.slack_api_key, str) or \
+        SITE_CONFIG.slack_api_key is None
 
 
 def test_redis_config_property():
