@@ -79,12 +79,12 @@ def clean_list(items):
     return cleaned
 
 
-def send_to_slack(message, config,  channel="#general"):
+def send_to_slack(message, config,  channel='#general'):
     """
     Sends a message to the ToR slack.
 
     :param message: String; the message that is to be encoded
-    :param channel: channel option, defaults to general
+    :param channel: String; channel option, defaults to general
     :param config: the global config dict.
     :return: None.
     """
@@ -92,7 +92,7 @@ def send_to_slack(message, config,  channel="#general"):
         slackc = SlackClient(config.slack_api_key)
 
         slackc.api_call(
-            "chat.postMessage",
+            'chat.postMessage',
             channel=channel,
             text=message
         )
