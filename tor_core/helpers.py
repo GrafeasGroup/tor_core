@@ -11,6 +11,7 @@ from tor_core import __version__
 from tor_core.config import config
 from tor_core.heartbeat import stop_heartbeat_server
 from tor_core.strings import bot_footer
+from slackclient import SlackClient
 
 
 class Object(object):
@@ -79,23 +80,23 @@ def clean_list(items):
     return cleaned
 
 
-def send_to_slack(message, config):
+def send_to_slack(message, config, channel='#general'):
     """
-    Sends a message to the ToR #general slack channel.
+    Sends a message to the ToR slack.
 
-    :param message: String; the message that is to be encoded.
+    :param message: String; the message that is to be encoded
+    :param channel: String; channel option, defaults to general
     :param config: the global config dict.
     :return: None.
     """
-    # if we have the api url loaded, then fire off the message.
-    # Otherwise, don't worry about it and just return.
-    if config.slack_api_url:
-        payload = {
-            'username': 'Kierra',
-            'icon_emoji': ':snoo:',
-            'text': message
-        }
-        requests.post(config.slack_api_url, json=payload)
+    if config.slack_api_key:
+        slackc = SlackClient(config.slack_api_key)
+
+        slackc.api_call(
+            'chat.postMessage',
+            channel=channel,
+            text=message
+        )
 
     return
 

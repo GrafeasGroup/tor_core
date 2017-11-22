@@ -177,7 +177,7 @@ class Config(object):
 
     # API keys for later overwriting based on contents of filesystem
     bugsnag_api_key = None
-    slack_api_url = None
+    slack_api_key = None
     sentry_api_url = None
 
     # Templating string for the header of the bot post
@@ -260,9 +260,9 @@ if bugsnag and Config.bugsnag_api_key:
     )
 
 try:
-    Config.slack_api_url = open('slack.key').readline().strip()
+    Config.slack_api_key = open('slack.key').readline().strip()
 except OSError:
-    Config.slack_api_url = os.environ.get('SLACK_API_URL', None)
+    Config.slack_api_key = os.environ.get('SLACK_API_KEY', None)
 
 try:
     Config.sentry_api_url = open('sentry.key').readline().strip()
