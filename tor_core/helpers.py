@@ -13,6 +13,7 @@ from tor_core.heartbeat import stop_heartbeat_server
 from tor_core.strings import bot_footer
 from slackclient import SlackClient
 
+
 class Object(object):
     pass
 
@@ -79,7 +80,7 @@ def clean_list(items):
     return cleaned
 
 
-def send_to_slack(message, config,  channel='#general'):
+def send_to_slack(message, config, channel='#general'):
     """
     Sends a message to the ToR slack.
 
