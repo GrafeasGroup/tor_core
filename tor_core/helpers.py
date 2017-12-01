@@ -270,6 +270,7 @@ def signal_handler(signal, frame):
 
     if not running:
         logging.critical('User pressed CTRL+C twice!!! Killing!')
+        stop_heartbeat(config)
         sys.exit(1)
 
     logging.info(
