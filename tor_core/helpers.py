@@ -1,17 +1,17 @@
 import logging
 import re
 import sys
+import signal
 import time
 
-import prawcore
 import praw
-import requests
+import prawcore
+from slackclient import SlackClient
 
 from tor_core import __version__
 from tor_core.config import config
 from tor_core.heartbeat import stop_heartbeat_server
 from tor_core.strings import bot_footer
-from slackclient import SlackClient
 
 
 class Object(object):
@@ -46,6 +46,9 @@ css_flair.disregard = 'disregard'
 
 # error message for an API timeout
 _pattern = re.compile('again in (?P<number>[0-9]+) (?P<unit>\w+)s?\.$', re.IGNORECASE)
+
+# CTRL+C handler variable
+running = True
 
 
 def _(message):
@@ -252,6 +255,30 @@ def handle_rate_limit(exc):
     time.sleep(delay + 1)
 
 
+def signal_handler(signal, frame):
+    """
+    This is the SIGINT handler that allows us to intercept CTRL+C.
+    When this is triggered, it will wait until the primary loop ends
+    the current iteration before ending. Press CTRL+C twice to kill
+    immediately.
+
+    :param signal: Unused.
+    :param frame: Unused.
+    :return: None.
+    """
+    global running
+
+    if not running:
+        logging.critical('User pressed CTRL+C twice!!! Killing!')
+        sys.exit(1)
+
+    logging.info(
+        '\rUser triggered command line shutdown. Will terminate after current '
+        'loop.'
+    )
+    running = False
+
+
 def run_until_dead(func, exceptions=default_exceptions):
     """
     The official method that replaces all that ugly boilerplate required to
@@ -267,8 +294,11 @@ def run_until_dead(func, exceptions=default_exceptions):
         issues) but they can be overridden with a passed-in set.
     :return: None.
     """
+    # handler for CTRL+C
+    signal.signal(signal.SIGINT, signal_handler)
+
     try:
-        while True:
+        while running:
             try:
                 func(config)
             except praw.exceptions.APIException as e:
@@ -285,7 +315,6 @@ def run_until_dead(func, exceptions=default_exceptions):
                 )
                 time.sleep(60)
 
-    except KeyboardInterrupt:
         logging.info('User triggered shutdown. Shutting down.')
         stop_heartbeat(config)
         sys.exit(0)

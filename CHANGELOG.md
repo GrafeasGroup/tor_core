@@ -5,6 +5,11 @@ means we will never make a backwards-incompatible change within a major version 
 
 ## _[UNRELEASED]_
 
+Nothing yet...
+
+## v0.4.0 (2017-11-30)
+
+- Adds proper CTRL+C handling (@itsthejoker)
 - Changing over to SlackClient (@ngtmeaty)
 - Able to bypass domain filters (@itsthejoker)
 - Adds support for better API rate limiting from Reddit (@itsthejoker)
@@ -14,7 +19,7 @@ means we will never make a backwards-incompatible change within a major version 
 
 ## v0.3.0 (2017-10-08)
 
-- Adds support for pulling all submissions from specific subreddits
+- Adds support for pulling all submissions from specific subreddits (@itsthejoker)
 
 ## v0.2.1 (2017-10-04)
 
