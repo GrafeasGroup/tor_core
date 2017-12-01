@@ -143,7 +143,7 @@ def populate_domain_lists(config):
 
         current_domain_list += domain_list
         # [current_domain_list.append(x) for x in domain_list]
-        logging.debug('Domain list populated: {}'.format(current_domain_list))
+        logging.debug(f'Domain list populated: {current_domain_list}')
 
 
 def populate_moderators(config):
@@ -172,9 +172,7 @@ def populate_subreddit_lists(config):
     config.subreddits_to_check = get_wiki_page('subreddits', config).split('\r\n')
     config.subreddits_to_check = clean_list(config.subreddits_to_check)
     logging.debug(
-        'Created list of subreddits from wiki: {}'.format(
-            config.subreddits_to_check
-        )
+        f'Created list of subreddits from wiki: {config.subreddits_to_check}'
     )
 
     for line in get_wiki_page(
@@ -185,9 +183,7 @@ def populate_subreddit_lists(config):
             config.upvote_filter_subs[sub] = int(threshold)
 
     logging.debug(
-        'Retrieved subreddits subject to the upvote filter: {}'.format(
-            config.upvote_filter_subs
-        )
+        f'Retrieved subreddits subject to the upvote filter: {config.upvote_filter_subs}'
     )
 
     config.subreddits_domain_filter_bypass = get_wiki_page(
@@ -197,9 +193,7 @@ def populate_subreddit_lists(config):
         config.subreddits_domain_filter_bypass
     )
     logging.debug(
-        'Retrieved subreddits that bypass the domain filter: {}'.format(
-            config.subreddits_domain_filter_bypass
-        )
+        f'Retrieved subreddits that bypass the domain filter: {config.subreddits_domain_filter_bypass}'
     )
 
     config.no_link_header_subs = get_wiki_page(
@@ -207,9 +201,7 @@ def populate_subreddit_lists(config):
     ).split('\r\n')
     config.no_link_header_subs = clean_list(config.no_link_header_subs)
     logging.debug(
-        'Retrieved subreddits subject to the upvote filter: {}'.format(
-            config.no_link_header_subs
-        )
+        f'Retrieved subreddits subject to the upvote filter: {config.no_link_header_subs}'
     )
 
     lines = get_wiki_page('subreddits/archive-time', config).splitlines()
@@ -268,7 +260,7 @@ def get_heartbeat_port(config):
             # create that file we looked for earlier
             with open('heartbeat.port', 'w') as port_file:
                 port_file.write(str(port))
-            logging.debug('generated port {} and saved to disk'.format(port))
+            logging.debug(f'generated port {port} and saved to disk')
 
             return port
 

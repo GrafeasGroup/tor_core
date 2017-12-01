@@ -37,7 +37,7 @@ def configure_heartbeat(config):
             'server.socket_port': config.heartbeat_port
         }
     )
-    logging.info('Heartbeat port: {}'.format(config.heartbeat_port))
+    logging.info(f'Heartbeat port: {config.heartbeat_port}')
 
     if config.heartbeat_logging is False:  # defaults to false
         # disable logging of hits from the heartbeat checker

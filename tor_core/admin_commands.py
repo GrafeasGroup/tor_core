@@ -19,7 +19,7 @@ def update_and_restart(reply, config):
 
         reply.reply(_(random.choice(config.no_gifs)))
         logging.info(
-            '{} just issued update. No.'.format(reply.author.name)
+            f'{reply.author.name} just issued update. No.'
         )
     else:
         # update from repo

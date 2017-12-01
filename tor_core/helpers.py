@@ -117,7 +117,7 @@ def explode_gracefully(error, config):
     logging.error(error)
 
     config.tor.message(
-        '{} BROKE - {}'.format(config.name, error.__class__.__name__.upper()),
+        f'{config.name} BROKE - {error.__class__.__name__.upper()}',
         'Please check Bugsnag for the complete error.'
     )
     sys.exit(1)
@@ -182,7 +182,7 @@ def get_wiki_page(pagename, config, return_on_fail=None, subreddit=None):
     """
     if not subreddit:
         subreddit = config.tor
-    logging.debug('Retrieving wiki page {}'.format(pagename))
+    logging.debug(f'Retrieving wiki page {pagename}')
     try:
         result = subreddit.wiki[pagename].content_md
         return result if result != '' else return_on_fail
@@ -202,7 +202,7 @@ def update_wiki_page(pagename, content, config, subreddit=None):
     :return: None.
     """
 
-    logging.debug('Updating wiki page {}'.format(pagename))
+    logging.debug(f'Updating wiki page {pagename}')
 
     if not subreddit:
         subreddit = config.tor
@@ -211,8 +211,7 @@ def update_wiki_page(pagename, content, config, subreddit=None):
         return subreddit.wiki[pagename].edit(content)
     except prawcore.exceptions.NotFound as e:
         logging.error(
-            '{} - Requested wiki page {} not found. '
-            'Cannot update.'.format(e, pagename)
+            f'{e} - Requested wiki page {pagename} not found. Cannot update.'
         )
 
 
@@ -311,8 +310,7 @@ def run_until_dead(func, exceptions=default_exceptions):
                     handle_rate_limit(e)
             except exceptions as e:
                 logging.warning(
-                    '{} - Issue communicating with Reddit. Sleeping for 60s!'
-                    ''.format(e)
+                    f'{e} - Issue communicating with Reddit. Sleeping for 60s!'
                 )
                 time.sleep(60)
 

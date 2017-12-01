@@ -243,7 +243,7 @@ class Config(object):
 
                 with open('heartbeat.port', 'w') as port_file:
                     port_file.write(str(port))
-                logging.debug('generated port {} and saved to disk'.format(port))
+                logging.debug(f'generated port {port} and saved to disk')
 
                 return port
 
