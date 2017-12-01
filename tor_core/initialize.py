@@ -183,7 +183,8 @@ def populate_subreddit_lists(config):
             config.upvote_filter_subs[sub] = int(threshold)
 
     logging.debug(
-        f'Retrieved subreddits subject to the upvote filter: {config.upvote_filter_subs}'
+        f'Retrieved subreddits subject to the upvote filter: '
+        f'{config.upvote_filter_subs} '
     )
 
     config.subreddits_domain_filter_bypass = get_wiki_page(
@@ -193,7 +194,8 @@ def populate_subreddit_lists(config):
         config.subreddits_domain_filter_bypass
     )
     logging.debug(
-        f'Retrieved subreddits that bypass the domain filter: {config.subreddits_domain_filter_bypass}'
+        f'Retrieved subreddits that bypass the domain filter: '
+        f'{config.subreddits_domain_filter_bypass} '
     )
 
     config.no_link_header_subs = get_wiki_page(
@@ -201,7 +203,8 @@ def populate_subreddit_lists(config):
     ).split('\r\n')
     config.no_link_header_subs = clean_list(config.no_link_header_subs)
     logging.debug(
-        f'Retrieved subreddits subject to the upvote filter: {config.no_link_header_subs}'
+        f'Retrieved subreddits subject to the upvote filter: '
+        f'{config.no_link_header_subs} '
     )
 
     lines = get_wiki_page('subreddits/archive-time', config).splitlines()
