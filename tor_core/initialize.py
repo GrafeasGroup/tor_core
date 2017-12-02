@@ -64,7 +64,8 @@ def configure_logging(config, log_name='transcribersofreddit.log'):
     )
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
-    formatter = logging.Formatter('[%(asctime)s] - [%(funcName)s] - %(message)s')
+    formatter = logging.Formatter(
+        '[%(asctime)s] - [%(funcName)s] - %(message)s')
     # tell the handler to use this format
     console.setFormatter(formatter)
 
@@ -169,7 +170,8 @@ def populate_subreddit_lists(config):
     config.upvote_filter_subs = {}
     config.no_link_header_subs = []
 
-    config.subreddits_to_check = get_wiki_page('subreddits', config).split('\r\n')
+    config.subreddits_to_check = get_wiki_page('subreddits',
+                                               config).splitlines()
     config.subreddits_to_check = clean_list(config.subreddits_to_check)
     logging.debug(
         f'Created list of subreddits from wiki: {config.subreddits_to_check}'
@@ -302,7 +304,8 @@ def build_bot(
 
     if not require_redis:
         # I'm sorry
-        type(config).redis = property(lambda x: (_ for _ in ()).throw(NotImplementedError('Redis was disabled during building!')))
+        type(config).redis = property(lambda x: (_ for _ in ()).throw(
+            NotImplementedError('Redis was disabled during building!')))
 
     initialize(config)
 

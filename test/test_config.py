@@ -53,7 +53,8 @@ def test_redis_config_property():
         pass
 
     # Check stubbing with derivations of BaseException
-    type(SITE_CONFIG).redis = property(lambda x: (_ for _ in ()).throw(NotImplementedError('Redis was disabled')))
+    type(SITE_CONFIG).redis = property(lambda x: (_ for _ in ()).throw(
+        NotImplementedError('Redis was disabled')))
 
     with pytest.raises(NotImplementedError):
         SITE_CONFIG.redis.ping()

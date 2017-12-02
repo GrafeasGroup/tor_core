@@ -8,7 +8,9 @@ conf = {
     '/': {
         'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
         'tools.response_headers.on': True,
-        'tools.response_headers.headers': [('Content-Type', 'application/json')],
+        'tools.response_headers.headers': [
+            ('Content-Type', 'application/json')
+        ],
     }
 }
 
@@ -72,6 +74,7 @@ def start_heartbeat_server():
     cherrypy.server.socket_host = "127.0.0.1"
     cherrypy.engine.start()
     logging.info('Cherrypy heartbeat started!')
+
 
 def stop_heartbeat_server():
     """

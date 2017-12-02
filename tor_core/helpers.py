@@ -45,7 +45,8 @@ css_flair.meta = 'meta'
 css_flair.disregard = 'disregard'
 
 # error message for an API timeout
-_pattern = re.compile('again in (?P<number>[0-9]+) (?P<unit>\w+)s?\.$', re.IGNORECASE)
+_pattern = re.compile('again in (?P<number>[0-9]+) (?P<unit>\w+)s?\.$',
+                      re.IGNORECASE)
 
 # CTRL+C handler variable
 running = True
