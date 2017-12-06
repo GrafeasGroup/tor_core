@@ -10,6 +10,7 @@ from raven.conf import setup_logging
 from praw import Reddit
 from raven import Client
 
+from tor_core import __HEARTBEAT_FILE__
 from tor_core.config import config
 from tor_core.heartbeat import configure_heartbeat
 from tor_core.helpers import clean_list
@@ -248,10 +249,9 @@ def get_heartbeat_port(config):
     :param config: the global config object
     :return: int; the port number to use.
     """
-    heartbeat_file = os.getenv('HEARTBEAT_FILE', 'heartbeat.port')
     try:
         # have we already reserved a port for this process?
-        with open(heartbeat_file, 'r') as port_file:
+        with open(__HEARTBEAT_FILE__, 'r') as port_file:
             port = int(port_file.readline().strip())
         logging.debug('Found existing port saved on disk')
         return port
@@ -264,7 +264,7 @@ def get_heartbeat_port(config):
             config.redis.sadd('active_heartbeat_ports', port)
 
             # create that file we looked for earlier
-            with open('heartbeat.port', 'w') as port_file:
+            with open(__HEARTBEAT_FILE__, 'w') as port_file:
                 port_file.write(str(port))
             logging.debug(f'generated port {port} and saved to disk')
 
