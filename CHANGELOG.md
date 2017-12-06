@@ -7,6 +7,10 @@ means we will never make a backwards-incompatible change within a major version 
 
 Nothing yet...
 
+## v0.4.1 (2017-12-05)
+
+- Heartbeat port filename is read from environment variable to fix concurrency issue with bots (@thelonelyghost)
+
 ## v0.4.0 (2017-11-30)
 
 - Adds proper CTRL+C handling (@itsthejoker)

@@ -248,9 +248,10 @@ def get_heartbeat_port(config):
     :param config: the global config object
     :return: int; the port number to use.
     """
+    heartbeat_file = os.getenv('HEARTBEAT_FILE', 'heartbeat.port')
     try:
         # have we already reserved a port for this process?
-        with open('heartbeat.port', 'r') as port_file:
+        with open(heartbeat_file, 'r') as port_file:
             port = int(port_file.readline().strip())
         logging.debug('Found existing port saved on disk')
         return port
