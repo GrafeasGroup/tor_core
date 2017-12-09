@@ -59,19 +59,10 @@ def configure_redis():
 def configure_logging(config, log_name='transcribersofreddit.log'):
     logging.basicConfig(
         level=logging.INFO,
-        format='[%(asctime)s] - [%(levelname)s] - [%(funcName)s] - %(message)s',
-        datefmt='%m/%d/%Y %I:%M:%S %p',
-        filename=log_name
+        format='%(levelname)s | %(funcName)s | %(message)s',
+        datefmt='%Y-%m-%dT%H:%M:%S',
     )
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    formatter = logging.Formatter(
-        '[%(asctime)s] - [%(funcName)s] - %(message)s')
-    # tell the handler to use this format
-    console.setFormatter(formatter)
 
-    # add the handlers to the root logger
-    logging.getLogger('').addHandler(console)
     # will intercept anything error level or above
     if config.bugsnag_api_key:
         bs_handler = BugsnagHandler()
