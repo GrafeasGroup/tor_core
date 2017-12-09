@@ -1,6 +1,6 @@
 .PHONY: clean all test
 
-all: test clean
+all: develop test clean
 	@true
 
 clean:
@@ -9,4 +9,10 @@ clean:
 	@find . -regex '.+/__pycache__$$' -exec rm -rf {} \; -prune
 
 test: clean
-	@python setup.py test
+	@python3 setup.py test
+
+install: clean
+	@python3 -m pip install --process-dependency-links -e .
+
+develop: clean
+	@python3 -m pip install --process-dependency-links -e .[dev]
