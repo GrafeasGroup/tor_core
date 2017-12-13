@@ -115,7 +115,7 @@ def explode_gracefully(error, config):
     :param tor: the r/ToR helper object
     :return: Nothing. Everything dies here.
     """
-    logging.error(error)
+    logging.critical(error)
     sys.exit(1)
 
 
