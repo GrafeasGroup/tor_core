@@ -116,11 +116,6 @@ def explode_gracefully(error, config):
     :return: Nothing. Everything dies here.
     """
     logging.error(error)
-
-    config.tor.message(
-        f'{config.name} BROKE - {error.__class__.__name__.upper()}',
-        'Please check Bugsnag for the complete error.'
-    )
     sys.exit(1)
 
 
