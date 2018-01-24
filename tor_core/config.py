@@ -77,8 +77,8 @@ class BaseConfig(object):
     Specify overridden values on object instantiation for purposes
     of testing and by pulling from remote source (e.g., Reddit Wiki)
     """
-    def __init__(self, domain_list=list()):
-        self.domain_list = domain_list
+    def __init__(self, domains=list()):
+        self.domains = domains
 
 
 class VideoConfig(BaseConfig):
@@ -168,7 +168,7 @@ class Config(object):
 
     # Media-specific rules, which are fetchable by a dict key. These
     # are intended to be programmatically accessible based on a
-    # parameter given instead of hardcoding the media type in a
+    # parameter given instead of hard-coding the media type in a
     # switch-case style of control structure
     media = {
         'audio': AudioConfig(),

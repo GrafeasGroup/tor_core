@@ -129,7 +129,7 @@ def populate_subreddit_info(config):
             )
 
         config.no_link_header_subs = [
-            sub for sub in subbies.keys() if \
+            sub for sub in subbies.keys() if
             subbies[sub].get('no_link_header') is True
         ]
 
@@ -141,25 +141,24 @@ def populate_settings(config):
 
     with open(config.config_location + '/bots/settings.json') as settings:
         settings = json.load(settings)
-        config.video_domains = settings['filters']['domains']['video']
-        config.image_domains = settings['filters']['domains']['images']
-        config.audio_domains = settings['filters']['domains']['audio']
 
         config.no_gifs = settings['gifs']['no']
         config.thumbs_up_gifs = settings['gifs']['thumbs_up']
 
-
     with open(config.config_location + '/templates/audio/base.md') as audio:
-        config.media['audio'] = ''.join(audio.readlines())
+        config.media['audio'].base_format = ''.join(audio.readlines())
+        config.media['audio'].domains = settings['filters']['domains']['audio']
 
     with open(config.config_location + '/templates/video/base.md') as video:
-        config.media['video'] = ''.join(video.readlines())
+        config.media['video'].base_format = ''.join(video.readlines())
+        config.media['video'].domains = settings['filters']['domains']['video']
 
     with open(config.config_location + '/templates/image/base.md') as images:
-        config.media['image'] = ''.join(images.readlines())
+        config.media['image'].base_format = ''.join(images.readlines())
+        config.media['image'].domains = settings['filters']['domains']['images']
 
     with open(config.config_location + '/templates/other/base.md') as other:
-        config.media['other'] = ''.join(other.readlines())
+        config.media['other'].base_format = ''.join(other.readlines())
 
 
 def initialize(config):
