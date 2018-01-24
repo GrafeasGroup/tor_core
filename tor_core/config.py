@@ -138,8 +138,8 @@ class Subreddit(praw_subreddit):
 
     def __init__(
             self,
+            subreddit_name,
             reddit_instance=None,  # Required!
-            subreddit_name=None,
             bypass_domain_filter=None,
             upvote_filter=None,
             active=True,
@@ -187,15 +187,11 @@ class Config(object):
     bugsnag_api_key = None
     slack_api_key = None
 
-    # Templating string for the header of the bot post
-    header = ''
-
+    # Templating string for the footer of the bot post
+    footer = ''
     perform_footer_check = True
-    debug_mode = False
 
-    # delay times for removing posts; these are used by u/ToR_archivist
-    archive_time_default = None
-    archive_time_subreddits = {}
+    debug_mode = False
 
     # Global flag to enable/disable placing the triggers
     # for the OCR bot

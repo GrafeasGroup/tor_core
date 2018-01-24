@@ -9,6 +9,7 @@ from bugsnag.handlers import BugsnagHandler
 from praw import Reddit
 
 from tor_core.config import config
+from tor_core.config import Subreddit
 from tor_core.heartbeat import configure_heartbeat
 from tor_core.helpers import clean_list
 from tor_core.helpers import get_wiki_page
@@ -62,86 +63,43 @@ def configure_logging(config, log_name='transcribersofreddit.log'):
     log_header('Starting!')
 
 
-def populate_subreddit_lists(config):
-    """
-    Gets the list of subreddits to monitor and loads it into memory.
-
-    :return: None.
-    """
-
-
-    for line in get_wiki_page(
-        'subreddits/upvote-filtered', config
-    ).splitlines():
-        if ',' in line:
-            sub, threshold = line.split(',')
-            config.upvote_filter_subs[sub] = int(threshold)
-
-    logging.debug(
-        'Retrieved subreddits subject to the upvote filter: {}'.format(
-            config.upvote_filter_subs
-        )
-    )
-
-    config.subreddits_domain_filter_bypass = get_wiki_page(
-        'subreddits/domain-filter-bypass', config
-    ).split('\r\n')
-    config.subreddits_domain_filter_bypass = clean_list(
-        config.subreddits_domain_filter_bypass
-    )
-    logging.debug(
-        'Retrieved subreddits that bypass the domain filter: {}'.format(
-            config.subreddits_domain_filter_bypass
-        )
-    )
-
-
-
 def verify_configs(config):
     config_location = os.environ.get('TOR_CONFIG_DIR', '/opt/configs')
     if not os.path.exists(config_location):
         raise Exception('Cannot load configs! Bad path!')
     config.config_location = config_location
 
+
 def populate_subreddit_info(config):
     with open(config.config_location + '/bots/subreddits.json') as subbies:
-        subbies = json.load(subbies)['subreddits']
-        config.subreddits_to_check = [
-            sub for sub in subbies.keys() if not \
-                subbies[sub].get('active') is False
-        ]
-
-        config.upvote_filter_subs = dict()
-        for sub in subbies.keys():
-            if subbies[sub].get('upvote_filter') is not None:
-                config.upvote_filter_subs[sub] = int(
-                    subbies[sub].get('upvote_filter')
+        subbies = json.load(subbies)
+        config.subreddits = [
+            Subreddit(
+                sub,
+                reddit_instance=config.r,
+                bypass_domain_filter=subbies['subreddits'][sub].get(
+                    'bypass_domain_filter', False
+                ),
+                upvote_filter=subbies['subreddits'][sub].get('upvote_filter', None),
+                active=subbies['subreddits'][sub].get('active', True),
+                no_link_header=subbies['subreddits'][sub].get('no_link_header'),
+                archive_time=subbies['subreddits'][sub].get(
+                    'archive_time',
+                    subbies['archive_time'].get('default_delay')
                 )
-
-        config.archive_time_default = subbies['archive_time']['default_delay']
-
-        config.archive_time_subreddits = dict()
-        for sub in subbies.keys():
-            config.archive_time_subreddits[sub] = (
-                subbies[sub].get('archive_time') if
-                subbies[sub].get('archive_time') is not None else
-                config.archive_time_default
-            )
-
-        config.no_link_header_subs = [
-            sub for sub in subbies.keys() if
-            subbies[sub].get('no_link_header') is True
+            ) for sub in subbies['subreddits'].keys()
         ]
 
 
 def populate_settings(config):
 
-    # this call returns a full list rather than a generator. Praw is weird.
+    # this call returns a full list rather than a generator. PRAW is weird.
     config.mods = config.tor.moderator()
 
     with open(config.config_location + '/bots/settings.json') as settings:
         settings = json.load(settings)
 
+        config.debug_mode = settings.get('debug_mode', False)
         config.no_gifs = settings['gifs']['no']
         config.thumbs_up_gifs = settings['gifs']['thumbs_up']
 
@@ -160,15 +118,18 @@ def populate_settings(config):
     with open(config.config_location + '/templates/other/base.md') as other:
         config.media['other'].base_format = ''.join(other.readlines())
 
+    with open(config.config_location + '/bots/footer.md') as footer:
+        config.footer = ''.join(footer.readlines()).strip()
+
 
 def initialize(config):
     verify_configs(config)
 
     populate_subreddit_info(config)
-    logging.debug('Subreddit information loaded.')
+    logging.info('Subreddit information loaded.')
 
     populate_settings(config)
-    logging.debug('Settings loaded.')
+    logging.info('Settings loaded.')
 
 
 def get_heartbeat_port(config):
@@ -224,6 +185,8 @@ def build_bot(
     :param require_redis: bool; triggers the creation of the Redis instance.
         Any bot that does not require use of Redis can set this to False and
         not have it crash on start because Redis isn't running.
+    :param heartbeat_logging: bool; enables extremely verbose logging from
+        CherryPy on heartbeat activity.
     :return: None
     """
 
@@ -233,10 +196,6 @@ def build_bot(
     config.bot_version = version
     config.heartbeat_logging = heartbeat_logging
     configure_logging(config, log_name=log_name)
-
-    if not require_redis:
-        # I'm sorry
-        type(config).redis = property(lambda x: (_ for _ in ()).throw(NotImplementedError('Redis was disabled during building!')))
 
     initialize(config)
 
