@@ -101,7 +101,7 @@ def send_to_slack(message, config, channel='#general'):
     return
 
 
-def explode_gracefully(error, config):
+def explode_gracefully(error):
     """
     A last-ditch effort to try to raise a few more flags as it goes down.
     Only call in times of dire need.
@@ -112,11 +112,6 @@ def explode_gracefully(error, config):
     :return: Nothing. Everything dies here.
     """
     logging.error(error)
-
-    config.tor.message(
-        '{} BROKE - {}'.format(config.name, error.__class__.__name__.upper()),
-        'Please check Bugsnag for the complete error.'
-    )
     sys.exit(1)
 
 
@@ -292,4 +287,4 @@ def run_until_dead(func, exceptions=default_exceptions):
 
     except Exception as e:
         stop_heartbeat(config)
-        explode_gracefully(e, config)
+        explode_gracefully(e)
