@@ -2,6 +2,8 @@ import logging
 import os
 import random
 
+from praw.models import Subreddit as praw_subreddit
+
 # Load configuration regardless of if bugsnag is setup correctly
 try:
     import bugsnag
@@ -38,7 +40,7 @@ class cached_property(object):
     # descriptor. non-data descriptors are only invoked if there is no
     # entry with the same name in the instance's __dict__. this allows
     # us to completely get rid of the access function call overhead. If
-    # one choses to invoke __get__ by hand the property will still work
+    # one chooses to invoke __get__ by hand the property will still work
     # as expected because the lookup logic is replicated in __get__ for
     # manual invocation.
 
@@ -75,78 +77,82 @@ class BaseConfig:
     Specify overridden values on object instantiation for purposes
     of testing and by pulling from remote source (e.g., Reddit Wiki)
     """
-
-    # Whitelisted domains
-    domains = []
-
-    formatting = ''
+    footer = ''
 
 
 class VideoConfig(BaseConfig):
     """
     Media-specific configuration class for video content
-
-    Initialization should pull from the appropriate Reddit Wiki
-    page and fill in the proper values.
-
-    Include any video-specific configuration rules here
     """
+    def __init__(self, format=None):
+        self.format = format
+
+    def __repr__(self):
+        return self.format
 
 
 class AudioConfig(BaseConfig):
     """
     Media-specific configuration class for audio content
-
-    Initialization should pull from the appropriate Reddit Wiki
-    page and fill in the proper values.
     """
+    def __init__(self, format=None):
+        self.format = format
+
+    def __repr__(self):
+        return self.format
 
 
 class ImageConfig(BaseConfig):
     """
     Media-specific configuration class for image content
-
-    Initialization should pull from the appropriate Reddit Wiki
-    page and fill in the proper values.
     """
+    def __init__(self, format=None):
+        self.format = format
+
+    def __repr__(self):
+        return self.format
 
 
 class OtherContentConfig(BaseConfig):
     """
     Media-specific configuration class for any content that does not
     fit in with the above media types. Articles, mostly.
+    """
+    def __init__(self, format=None):
+        self.format = format
 
-    Initialization should pull from the appropriate Reddit Wiki
-    page and fill in the proper values.
+    def __repr__(self):
+        return self.format
+
+
+class Subreddit(praw_subreddit):
+    """
+    Subreddit base class. Contains all the information needed to handle a
+    single subreddit.
     """
 
+    def __init__(
+            self,
+            reddit_instance=None,  # Required!
+            subreddit_name=None,
+            bypass_domain_filter=None,
+            upvote_filter=None,
+            active=True,
+            no_link_header=False,
+            archive_time=18  # hours
+    ):
+        self.subreddit_name = subreddit_name
+        self.bypass_domain_filter = bypass_domain_filter
+        self.upvote_filter = upvote_filter
+        self.active = active
+        self.no_link_header = no_link_header
+        self.archive_time = archive_time
+        super(Subreddit, self).__init__(
+            reddit_instance, display_name=subreddit_name
+        )
 
-class Subreddit:
-    """
-    Subreddit-specific configurations
-
-    Intended for asking questions of specific subreddits
-
-    NOTE: WIP - Do not use in its current form
-    """
-
-    def __init__(self):
-        """
-        WIP - Do not use in production code yet
-        """
-        # TODO: set if upvote filter is needed per-subreddit
-
-    def needs_upvote_filter(self):
-        """
-        TODO: fill in method based on subreddit rules
-        """
-
-
-class DefaultSubreddit(Subreddit):
-    """
-    A default configuration for subreddits that don't require
-    special rules
-    """
+    def __repr__(self):
+        return self.subreddit_name
 
 
 class Config(object):
@@ -172,7 +178,6 @@ class Config(object):
     # A collection of Subreddit objects, injected later based on
     # subreddit-specific rules
     subreddits = []
-    subreddits_to_check = []
     subreddits_domain_filter_bypass = []
 
     # API keys for later overwriting based on contents of filesystem
@@ -182,8 +187,6 @@ class Config(object):
 
     # Templating string for the header of the bot post
     header = ''
-
-    no_gifs = []
 
     perform_header_check = True
     debug_mode = False
@@ -222,7 +225,7 @@ class Config(object):
     @cached_property
     def tor(self):
         if self.debug_mode:
-            return self.r.subreddit('ModsOfTor')
+            return self.r.subreddit('tor_testing_ground')
         else:
             return self.r.subreddit('transcribersofreddit')
 
@@ -243,7 +246,9 @@ class Config(object):
 
                 with open('heartbeat.port', 'w') as port_file:
                     port_file.write(str(port))
-                logging.debug('generated port {} and saved to disk'.format(port))
+                logging.debug(
+                    'generated port {} and saved to disk'.format(port)
+                )
 
                 return port
 
@@ -271,26 +276,26 @@ except OSError:
 
 # ----- Compatibility -----
 config = Config()
-config.core_version = __version__
-config.video_domains = []
-config.audio_domains = []
-config.image_domains = []
-
-config.video_formatting = ''
-config.audio_formatting = ''
-config.image_formatting = ''
-
-config.subreddits_to_check = []
-config.upvote_filter_subs = {}
-config.no_link_header_subs = []
-
-config.archive_time_default = 0
-config.archive_time_subreddits = {}
-
-config.tor_mods = []
-
-# section for gifs
-config.no_gifs = []
-
-# enables debug information for the cherrypy heartbeat server
-config.heartbeat_logging = False
+# config.core_version = __version__
+# config.video_domains = []
+# config.audio_domains = []
+# config.image_domains = []
+#
+# config.video_formatting = ''
+# config.audio_formatting = ''
+# config.image_formatting = ''
+#
+# config.subreddits_to_check = []
+# config.upvote_filter_subs = {}
+# config.no_link_header_subs = []
+#
+# config.archive_time_default = 0
+# config.archive_time_subreddits = {}
+#
+# config.tor_mods = []
+#
+# # section for gifs
+# config.no_gifs = []
+#
+# # enables debug information for the cherrypy heartbeat server
+# config.heartbeat_logging = False

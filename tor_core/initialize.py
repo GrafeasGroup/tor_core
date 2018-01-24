@@ -2,13 +2,11 @@ import logging
 import os
 import random
 import sys
+import json
 
 import redis
 from bugsnag.handlers import BugsnagHandler
-from raven.handlers.logging import SentryHandler
-from raven.conf import setup_logging
 from praw import Reddit
-from raven import Client
 
 from tor_core.config import config
 from tor_core.heartbeat import configure_heartbeat
@@ -29,30 +27,12 @@ def configure_tor(config):
     :return: the Subreddit object for the chosen subreddit.
     """
     if config.debug_mode:
-        tor = config.r.subreddit('ModsOfToR')
+        tor = config.r.subreddit('tor_testing_ground')
     else:
         # normal operation, our primary subreddit
         tor = config.r.subreddit('transcribersofreddit')
 
     return tor
-
-
-def configure_redis():
-    """
-    Creates a connection to the local Redis server, then returns the active
-    connection.
-
-    :return: object: the active Redis object.
-    """
-    try:
-        url = os.getenv('REDIS_CONNECTION_URL', 'redis://localhost:6379/0')
-        redis_server = redis.StrictRedis.from_url(url)
-        redis_server.ping()
-    except redis.exceptions.ConnectionError:
-        logging.fatal("Redis server is not running! Exiting!")
-        sys.exit(1)
-
-    return redis_server
 
 
 def configure_logging(config, log_name='transcribersofreddit.log'):
@@ -79,83 +59,7 @@ def configure_logging(config, log_name='transcribersofreddit.log'):
     else:
         logging.info('Not running with Bugsnag!')
 
-    if config.sentry_api_url:
-        sentry_handler = SentryHandler(Client(config.sentry_api_url))
-        sentry_handler.setLevel(logging.ERROR)
-        # I don't know what this line does but it seems required by raven
-        setup_logging(sentry_handler)
-        logging.getLogger('').addHandler(sentry_handler)
-        logging.info('Sentry enabled!')
-    else:
-        logging.info('Not running with Sentry!')
-
     log_header('Starting!')
-
-
-def populate_header(config):
-    config.header = ''
-    config.header = get_wiki_page('format/header', config)
-
-
-def populate_formatting(config):
-    """
-    Grabs the contents of the three wiki pages that contain the
-    formatting examples and stores them in the config object.
-
-    :return: None.
-    """
-    # zero out everything so we can reinitialize later
-    config.audio_formatting = ''
-    config.video_formatting = ''
-    config.image_formatting = ''
-    config.other_formatting = ''
-
-    config.audio_formatting = get_wiki_page('format/audio', config)
-    config.video_formatting = get_wiki_page('format/video', config)
-    config.image_formatting = get_wiki_page('format/images', config)
-    config.other_formatting = get_wiki_page('format/other', config)
-
-
-def populate_domain_lists(config):
-    """
-    Loads the approved content domains into the config object from the
-    wiki page.
-
-    :return: None.
-    """
-
-    config.video_domains = []
-    config.image_domains = []
-    config.audio_domains = []
-
-    domains = get_wiki_page('domains', config)
-    domains = ''.join(domains.splitlines()).split('---')
-
-    for domainset in domains:
-        domain_list = domainset[domainset.index('['):].strip('[]').split(', ')
-        current_domain_list = []
-        if domainset.startswith('video'):
-            current_domain_list = config.video_domains
-        elif domainset.startswith('audio'):
-            current_domain_list = config.audio_domains
-        elif domainset.startswith('images'):
-            current_domain_list = config.image_domains
-
-        current_domain_list += domain_list
-        # [current_domain_list.append(x) for x in domain_list]
-        logging.debug('Domain list populated: {}'.format(current_domain_list))
-
-
-def populate_moderators(config):
-    # Praw doesn't cache this information, so it requests it every damn time
-    # we ask about the moderators. Let's cache this so we can drastically cut
-    # down on the number of calls for the mod list.
-
-    # nuke the existing list
-    config.tor_mods = []
-
-    # this call returns a full list rather than a generator. Praw is weird.
-    config.tor_mods = config.tor.moderator()
 
 
 def populate_subreddit_lists(config):
@@ -165,17 +69,6 @@ def populate_subreddit_lists(config):
     :return: None.
     """
 
-    config.subreddits_to_check = []
-    config.upvote_filter_subs = {}
-    config.no_link_header_subs = []
-
-    config.subreddits_to_check = get_wiki_page('subreddits', config).split('\r\n')
-    config.subreddits_to_check = clean_list(config.subreddits_to_check)
-    logging.debug(
-        'Created list of subreddits from wiki: {}'.format(
-            config.subreddits_to_check
-        )
-    )
 
     for line in get_wiki_page(
         'subreddits/upvote-filtered', config
@@ -202,44 +95,81 @@ def populate_subreddit_lists(config):
         )
     )
 
-    config.no_link_header_subs = get_wiki_page(
-        'subreddits/no-link-header', config
-    ).split('\r\n')
-    config.no_link_header_subs = clean_list(config.no_link_header_subs)
-    logging.debug(
-        'Retrieved subreddits subject to the upvote filter: {}'.format(
-            config.no_link_header_subs
-        )
-    )
-
-    lines = get_wiki_page('subreddits/archive-time', config).splitlines()
-    config.archive_time_default = int(lines[0])
-    config.archive_time_subreddits = {}
-    for line in lines[1:]:
-        if ',' in line:
-            sub, time = line.split(',')
-            config.archive_time_subreddits[sub.lower()] = int(time)
 
 
-def populate_gifs(config):
-    # zero it out so we can load more
-    config.no_gifs = []
-    config.no_gifs = get_wiki_page('usefulgifs/no', config).split('\r\n')
+def verify_configs(config):
+    config_location = os.environ.get('TOR_CONFIG_DIR', '/opt/configs')
+    if not os.path.exists(config_location):
+        raise Exception('Cannot load configs! Bad path!')
+    config.config_location = config_location
+
+def populate_subreddit_info(config):
+    with open(config.config_location + '/bots/subreddits.json') as subbies:
+        subbies = json.load(subbies)['subreddits']
+        config.subreddits_to_check = [
+            sub for sub in subbies.keys() if not \
+                subbies[sub].get('active') is False
+        ]
+
+        config.upvote_filter_subs = dict()
+        for sub in subbies.keys():
+            if subbies[sub].get('upvote_filter') is not None:
+                config.upvote_filter_subs[sub] = int(
+                    subbies[sub].get('upvote_filter')
+                )
+
+        config.archive_time_default = subbies['archive_time']['default_delay']
+
+        config.archive_time_subreddits = dict()
+        for sub in subbies.keys():
+            config.archive_time_subreddits[sub] = (
+                subbies[sub].get('archive_time') if
+                subbies[sub].get('archive_time') is not None else
+                config.archive_time_default
+            )
+
+        config.no_link_header_subs = [
+            sub for sub in subbies.keys() if \
+            subbies[sub].get('no_link_header') is True
+        ]
+
+
+def populate_settings(config):
+
+    # this call returns a full list rather than a generator. Praw is weird.
+    config.mods = config.tor.moderator()
+
+    with open(config.config_location + '/bots/settings.json') as settings:
+        settings = json.load(settings)
+        config.video_domains = settings['filters']['domains']['video']
+        config.image_domains = settings['filters']['domains']['images']
+        config.audio_domains = settings['filters']['domains']['audio']
+
+        config.no_gifs = settings['gifs']['no']
+        config.thumbs_up_gifs = settings['gifs']['thumbs_up']
+
+
+    with open(config.config_location + '/templates/audio/base.md') as audio:
+        config.audio_formatting = ''.join(audio.readlines())
+
+    with open(config.config_location + '/templates/video/base.md') as video:
+        config.video_formatting = ''.join(video.readlines())
+
+    with open(config.config_location + '/templates/images/base.md') as images:
+        config.image_formatting = ''.join(images.readlines())
+
+    with open(config.config_location + '/templates/other/base.md') as other:
+        config.other_formatting = ''.join(other.readlines())
 
 
 def initialize(config):
-    populate_domain_lists(config)
-    logging.debug('Domains loaded.')
-    populate_subreddit_lists(config)
-    logging.debug('Subreddits loaded.')
-    populate_formatting(config)
-    logging.debug('Formatting loaded.')
-    populate_header(config)
-    logging.debug('Header loaded.')
-    populate_moderators(config)
-    logging.debug('Mod list loaded.')
-    populate_gifs(config)
-    logging.debug('Gifs loaded.')
+    verify_configs(config)
+
+    populate_subreddit_info(config)
+    logging.debug('Subreddit information loaded.')
+
+    populate_settings(config)
+    logging.debug('Settings loaded.')
 
 
 def get_heartbeat_port(config):

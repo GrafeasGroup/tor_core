@@ -24,13 +24,13 @@ def test_config_structure():
     assert isinstance(SITE_CONFIG.audio_formatting, str)
     assert isinstance(SITE_CONFIG.image_formatting, str)
 
-    assert isinstance(SITE_CONFIG.header, str)
+    assert isinstance(SITE_CONFIG.footer, str)
 
-    assert isinstance(SITE_CONFIG.subreddits_to_check, list)
+    assert isinstance(SITE_CONFIG.subreddits, list)
     assert isinstance(SITE_CONFIG.upvote_filter_subs, dict)
     assert isinstance(SITE_CONFIG.no_link_header_subs, list)
 
-    assert isinstance(SITE_CONFIG.tor_mods, list)
+    assert isinstance(SITE_CONFIG.mods, list)
 
     assert isinstance(SITE_CONFIG.perform_header_check, bool)
     assert isinstance(SITE_CONFIG.debug_mode, bool)

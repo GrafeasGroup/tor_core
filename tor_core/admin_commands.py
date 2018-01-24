@@ -9,7 +9,7 @@ import sh
 
 
 def from_moderator(reply, config):
-    return reply.author in config.tor_mods
+    return reply.author in config.mods
 
 
 # XXX: THIS DOES NOT WORK
