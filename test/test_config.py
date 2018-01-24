@@ -32,7 +32,7 @@ def test_config_structure():
 
     assert isinstance(SITE_CONFIG.mods, list)
 
-    assert isinstance(SITE_CONFIG.perform_header_check, bool)
+    assert isinstance(SITE_CONFIG.perform_footer_check, bool)
     assert isinstance(SITE_CONFIG.debug_mode, bool)
 
     assert isinstance(SITE_CONFIG.no_gifs, list)

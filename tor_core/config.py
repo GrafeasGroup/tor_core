@@ -60,7 +60,7 @@ class cached_property(object):
         return value
 
 
-class BaseConfig:
+class BaseConfig(object):
     """
     A base class used for all media-specific settings, e.g.,
     video, audio, image. This is intended to provide a unified
@@ -77,7 +77,8 @@ class BaseConfig:
     Specify overridden values on object instantiation for purposes
     of testing and by pulling from remote source (e.g., Reddit Wiki)
     """
-    footer = ''
+    def __init__(self, domain_list=list()):
+        self.domain_list = domain_list
 
 
 class VideoConfig(BaseConfig):
@@ -86,6 +87,7 @@ class VideoConfig(BaseConfig):
     """
     def __init__(self, format=None):
         self.format = format
+        super(VideoConfig, self).__init__()
 
     def __repr__(self):
         return self.format
@@ -97,6 +99,7 @@ class AudioConfig(BaseConfig):
     """
     def __init__(self, format=None):
         self.format = format
+        super(AudioConfig, self).__init__()
 
     def __repr__(self):
         return self.format
@@ -108,6 +111,7 @@ class ImageConfig(BaseConfig):
     """
     def __init__(self, format=None):
         self.format = format
+        super(ImageConfig, self).__init__()
 
     def __repr__(self):
         return self.format
@@ -120,6 +124,7 @@ class OtherContentConfig(BaseConfig):
     """
     def __init__(self, format=None):
         self.format = format
+        super(OtherContentConfig, self).__init__()
 
     def __repr__(self):
         return self.format
@@ -175,20 +180,17 @@ class Config(object):
     # List of mods of ToR, fetched later using PRAW
     mods = []
 
-    # A collection of Subreddit objects, injected later based on
-    # subreddit-specific rules
+    # A collection of Subreddit objects, injected later
     subreddits = []
-    subreddits_domain_filter_bypass = []
 
     # API keys for later overwriting based on contents of filesystem
     bugsnag_api_key = None
     slack_api_key = None
-    sentry_api_url = None
 
     # Templating string for the header of the bot post
     header = ''
 
-    perform_header_check = True
+    perform_footer_check = True
     debug_mode = False
 
     # delay times for removing posts; these are used by u/ToR_archivist

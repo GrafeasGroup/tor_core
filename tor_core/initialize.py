@@ -150,16 +150,16 @@ def populate_settings(config):
 
 
     with open(config.config_location + '/templates/audio/base.md') as audio:
-        config.audio_formatting = ''.join(audio.readlines())
+        config.media['audio'] = ''.join(audio.readlines())
 
     with open(config.config_location + '/templates/video/base.md') as video:
-        config.video_formatting = ''.join(video.readlines())
+        config.media['video'] = ''.join(video.readlines())
 
-    with open(config.config_location + '/templates/images/base.md') as images:
-        config.image_formatting = ''.join(images.readlines())
+    with open(config.config_location + '/templates/image/base.md') as images:
+        config.media['image'] = ''.join(images.readlines())
 
     with open(config.config_location + '/templates/other/base.md') as other:
-        config.other_formatting = ''.join(other.readlines())
+        config.media['other'] = ''.join(other.readlines())
 
 
 def initialize(config):
