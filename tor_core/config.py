@@ -85,36 +85,36 @@ class VideoConfig(BaseConfig):
     """
     Media-specific configuration class for video content
     """
-    def __init__(self, format=None):
-        self.format = format
+    def __init__(self, base_format=None):
+        self.base_format = base_format
         super(VideoConfig, self).__init__()
 
     def __repr__(self):
-        return self.format
+        return self.base_format
 
 
 class AudioConfig(BaseConfig):
     """
     Media-specific configuration class for audio content
     """
-    def __init__(self, format=None):
-        self.format = format
+    def __init__(self, base_format=None):
+        self.base_format = base_format
         super(AudioConfig, self).__init__()
 
     def __repr__(self):
-        return self.format
+        return self.base_format
 
 
 class ImageConfig(BaseConfig):
     """
     Media-specific configuration class for image content
     """
-    def __init__(self, format=None):
-        self.format = format
+    def __init__(self, base_format=None):
+        self.base_format = base_format
         super(ImageConfig, self).__init__()
 
     def __repr__(self):
-        return self.format
+        return self.base_format
 
 
 class OtherContentConfig(BaseConfig):
@@ -122,12 +122,12 @@ class OtherContentConfig(BaseConfig):
     Media-specific configuration class for any content that does not
     fit in with the above media types. Articles, mostly.
     """
-    def __init__(self, format=None):
-        self.format = format
+    def __init__(self, base_format=None):
+        self.base_format = base_format
         super(OtherContentConfig, self).__init__()
 
     def __repr__(self):
-        return self.format
+        return self.base_format
 
 
 class Subreddit(praw_subreddit):
