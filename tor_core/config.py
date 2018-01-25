@@ -278,29 +278,3 @@ try:
     Config.sentry_api_url = open('sentry.key').readline().strip()
 except OSError:
     Config.sentry_api_url = os.environ.get('SENTRY_API_URL', None)
-
-# ----- Compatibility -----
-# config = Config()
-# config.core_version = __version__
-# config.video_domains = []
-# config.audio_domains = []
-# config.image_domains = []
-#
-# config.video_formatting = ''
-# config.audio_formatting = ''
-# config.image_formatting = ''
-#
-# config.subreddits_to_check = []
-# config.upvote_filter_subs = {}
-# config.no_link_header_subs = []
-#
-# config.archive_time_default = 0
-# config.archive_time_subreddits = {}
-#
-# config.tor_mods = []
-#
-# # section for gifs
-# config.no_gifs = []
-#
-# # enables debug information for the cherrypy heartbeat server
-# config.heartbeat_logging = False
