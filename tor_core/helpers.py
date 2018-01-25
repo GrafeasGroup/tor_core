@@ -1,16 +1,16 @@
 import logging
 import re
 import sys
+import signal
 import time
 
-import prawcore
 import praw
-import requests
+import prawcore
+from slackclient import SlackClient
 
 from tor_core import __version__
 from tor_core.heartbeat import stop_heartbeat_server
 from tor_core.strings import bot_footer
-from slackclient import SlackClient
 
 
 class Object(object):
@@ -44,7 +44,11 @@ css_flair.meta = 'meta'
 css_flair.disregard = 'disregard'
 
 # error message for an API timeout
-_pattern = re.compile('again in (?P<number>[0-9]+) (?P<unit>\w+)s?\.$', re.IGNORECASE)
+_pattern = re.compile('again in (?P<number>[0-9]+) (?P<unit>\w+)s?\.$',
+                      re.IGNORECASE)
+
+# CTRL+C handler variable
+running = True
 
 
 def _(message):
@@ -172,7 +176,7 @@ def get_wiki_page(pagename, config, return_on_fail=None, subreddit=None):
     """
     if not subreddit:
         subreddit = config.tor
-    logging.debug('Retrieving wiki page {}'.format(pagename))
+    logging.debug(f'Retrieving wiki page {pagename}')
     try:
         result = subreddit.wiki[pagename].content_md
         return result if result != '' else return_on_fail
@@ -192,7 +196,7 @@ def update_wiki_page(pagename, content, config, subreddit=None):
     :return: None.
     """
 
-    logging.debug('Updating wiki page {}'.format(pagename))
+    logging.debug(f'Updating wiki page {pagename}')
 
     if not subreddit:
         subreddit = config.tor
@@ -201,8 +205,7 @@ def update_wiki_page(pagename, content, config, subreddit=None):
         return subreddit.wiki[pagename].edit(content)
     except prawcore.exceptions.NotFound as e:
         logging.error(
-            '{} - Requested wiki page {} not found. '
-            'Cannot update.'.format(e, pagename)
+            f'{e} - Requested wiki page {pagename} not found. Cannot update.'
         )
 
 
@@ -244,6 +247,31 @@ def handle_rate_limit(exc):
     time.sleep(delay + 1)
 
 
+def signal_handler(signal, frame):
+    """
+    This is the SIGINT handler that allows us to intercept CTRL+C.
+    When this is triggered, it will wait until the primary loop ends
+    the current iteration before ending. Press CTRL+C twice to kill
+    immediately.
+
+    :param signal: Unused.
+    :param frame: Unused.
+    :return: None.
+    """
+    global running
+
+    if not running:
+        logging.critical('User pressed CTRL+C twice!!! Killing!')
+        stop_heartbeat()
+        sys.exit(1)
+
+    logging.info(
+        '\rUser triggered command line shutdown. Will terminate after current '
+        'loop.'
+    )
+    running = False
+
+
 def run_until_dead(func, config, exceptions=default_exceptions):
     """
     The official method that replaces all that ugly boilerplate required to
@@ -260,8 +288,11 @@ def run_until_dead(func, config, exceptions=default_exceptions):
         issues) but they can be overridden with a passed-in set.
     :return: None.
     """
+    # handler for CTRL+C
+    signal.signal(signal.SIGINT, signal_handler)
+
     try:
-        while True:
+        while running:
             try:
                 func(config)
             except praw.exceptions.APIException as e:
@@ -273,12 +304,10 @@ def run_until_dead(func, config, exceptions=default_exceptions):
                     handle_rate_limit(e)
             except exceptions as e:
                 logging.warning(
-                    '{} - Issue communicating with Reddit. Sleeping for 60s!'
-                    ''.format(e)
+                    f'{e} - Issue communicating with Reddit. Sleeping for 60s!'
                 )
                 time.sleep(60)
 
-    except KeyboardInterrupt:
         logging.info('User triggered shutdown. Shutting down.')
         stop_heartbeat()
         sys.exit(0)

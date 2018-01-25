@@ -13,6 +13,7 @@ except ImportError:
     bugsnag = None
 
 from tor_core import __version__
+from tor_core import __HEARTBEAT_FILE__
 
 
 _missing = object()
@@ -237,7 +238,7 @@ class Config(object):
     @cached_property
     def heartbeat_port(self):
         try:
-            with open('heartbeat.port', 'r') as port_file:
+            with open(__HEARTBEAT_FILE__, 'r') as port_file:
                 port = int(port_file.readline().strip())
             logging.debug('Found existing port saved on disk')
             return port
@@ -249,11 +250,9 @@ class Config(object):
             if self.redis.sismember('active_heartbeat_ports', port) == 0:
                 self.redis.sadd('active_heartbeat_ports', port)
 
-                with open('heartbeat.port', 'w') as port_file:
+                with open(__HEARTBEAT_FILE__, 'w') as port_file:
                     port_file.write(str(port))
-                logging.debug(
-                    'generated port {} and saved to disk'.format(port)
-                )
+                logging.debug(f'generated port {port} and saved to disk')
 
                 return port
 
