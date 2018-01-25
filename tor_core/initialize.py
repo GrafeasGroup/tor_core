@@ -60,7 +60,7 @@ def configure_logging(config, log_name='transcribersofreddit.log'):
 
 
 def verify_configs(config):
-    config_location = os.environ.get('TOR_CONFIG_DIR', '/opt/configs')
+    config_location = os.environ.get('TOR_CONFIG_DIR', '/opt/configs/')
     if not os.path.exists(config_location):
         raise Exception('Cannot load configs! Bad path!')
     config.config_location = config_location
@@ -68,23 +68,23 @@ def verify_configs(config):
 
 
 def populate_subreddit_info(config):
-    with open(config.config_location + '/bots/subreddits.json') as subbies:
+    with open(
+            os.path.join(config.config_location, 'bots/subreddits.json')
+    ) as subbies:
         subbies = json.load(subbies)
         config.subreddits = [
             Subreddit(
-                sub,
+                name,
                 reddit_instance=config.r,
-                bypass_domain_filter=subbies['subreddits'][sub].get(
-                    'bypass_domain_filter', False
-                ),
-                upvote_filter=subbies['subreddits'][sub].get('upvote_filter', None),
-                active=subbies['subreddits'][sub].get('active', True),
-                no_link_header=subbies['subreddits'][sub].get('no_link_header'),
-                archive_time=subbies['subreddits'][sub].get(
+                bypass_domain_filter=sub.get('bypass_domain_filter', False),
+                upvote_filter=sub.get('upvote_filter', None),
+                active=sub.get('active', True),
+                no_link_header=sub.get('no_link_header'),
+                archive_time=sub.get(
                     'archive_time',
-                    subbies['archive_time'].get('default_delay')
+                    subbies['archive_time']['default_delay']
                 )
-            ) for sub in subbies['subreddits'].keys()
+            ) for name, sub in subbies['subreddits'].items()
         ]
     return config
 
@@ -94,7 +94,9 @@ def populate_settings(config):
     # this call returns a full list rather than a generator. PRAW is weird.
     config.mods = config.tor.moderator()
 
-    with open(config.config_location + '/bots/settings.json') as settings:
+    with open(
+            os.path.join(config.config_location + 'bots/settings.json')
+    ) as settings:
         settings = json.load(settings)
 
         config.debug_mode = settings.get('debug_mode', False)
@@ -106,22 +108,32 @@ def populate_settings(config):
         config.no_gifs = settings['gifs']['no']
         config.thumbs_up_gifs = settings['gifs']['thumbs_up']
 
-    with open(config.config_location + '/templates/audio/base.md') as audio:
+    with open(
+            os.path.join(config.config_location + 'templates/audio/base.md')
+    ) as audio:
         config.media['audio'].base_format = ''.join(audio.readlines())
         config.media['audio'].domains = settings['filters']['domains']['audio']
 
-    with open(config.config_location + '/templates/video/base.md') as video:
+    with open(
+            os.path.join(config.config_location + 'templates/video/base.md')
+    ) as video:
         config.media['video'].base_format = ''.join(video.readlines())
         config.media['video'].domains = settings['filters']['domains']['video']
 
-    with open(config.config_location + '/templates/image/base.md') as images:
+    with open(
+            os.path.join(config.config_location + 'templates/image/base.md')
+    ) as images:
         config.media['image'].base_format = ''.join(images.readlines())
         config.media['image'].domains = settings['filters']['domains']['images']
 
-    with open(config.config_location + '/templates/other/base.md') as other:
+    with open(
+            os.path.join(config.config_location + 'templates/other/base.md')
+    ) as other:
         config.media['other'].base_format = ''.join(other.readlines())
 
-    with open(config.config_location + '/bots/footer.md') as footer:
+    with open(
+            os.path.join(config.config_location + 'bots/footer.md')
+    ) as footer:
         config.footer = ''.join(footer.readlines()).strip()
     return config
 
