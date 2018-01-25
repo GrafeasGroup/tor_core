@@ -282,7 +282,8 @@ def run_until_dead(func, config, exceptions=default_exceptions):
     :param func: The function that you want to run; this will automatically be
         passed the config object. Historically, this is the only thing needed
         to start a bot.
-    :param config: object; the settings for the bot. This is created
+    :param config: object; the settings for the bot. This is created during
+        the `build_bot()` phase.
     :param exceptions: A tuple of exception classes to guard against. These are
         a set of PRAW connection errors (timeouts and general connection
         issues) but they can be overridden with a passed-in set.
