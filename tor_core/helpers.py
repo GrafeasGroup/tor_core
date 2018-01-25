@@ -8,7 +8,6 @@ import praw
 import requests
 
 from tor_core import __version__
-from tor_core.config import config
 from tor_core.heartbeat import stop_heartbeat_server
 from tor_core.strings import bot_footer
 from slackclient import SlackClient
@@ -106,9 +105,7 @@ def explode_gracefully(error):
     A last-ditch effort to try to raise a few more flags as it goes down.
     Only call in times of dire need.
 
-    :param bot_name: string; the name of the bot calling the method.
     :param error: an exception object.
-    :param tor: the r/ToR helper object
     :return: Nothing. Everything dies here.
     """
     logging.error(error)
@@ -160,7 +157,8 @@ def get_parent_post_id(post, r):
 
 def get_wiki_page(pagename, config, return_on_fail=None, subreddit=None):
     """
-    Return the contents of a given wiki page.
+    Return the contents of a given wiki page. In theory, this should
+    not need to be used anymore.
 
     :param pagename: String. The name of the page to be requested.
     :param config: Dict. Global config object.
@@ -208,7 +206,7 @@ def update_wiki_page(pagename, content, config, subreddit=None):
         )
 
 
-def deactivate_heartbeat_port(port):
+def deactivate_heartbeat_port(port, config):
     """
     This isn't used as part of the normal functions; when a port is created,
     it gets used again and again. The point of this function is to deregister
@@ -222,14 +220,13 @@ def deactivate_heartbeat_port(port):
     logging.info('Removed port from set of heartbeats.')
 
 
-def stop_heartbeat(config):
+def stop_heartbeat():
     """
     Any logic that goes along with stopping the cherrypy heartbeat server goes
     here. This is called on exit of `run_until_dead()`, either through keyboard
     or crash. The heartbeat server will terminate if the process dies anyway,
     but this allows for a clean shutdown.
 
-    :param config: the global config object
     :return: None
     """
     stop_heartbeat_server()
@@ -243,11 +240,11 @@ def handle_rate_limit(exc):
         'hour': 60 * 60,
     }
     matches = re.search(_pattern, exc.message)
-    delay = matches[0] * time_map[matches[1]]
+    delay = int(matches[0] * time_map[matches[1]])
     time.sleep(delay + 1)
 
 
-def run_until_dead(func, exceptions=default_exceptions):
+def run_until_dead(func, config, exceptions=default_exceptions):
     """
     The official method that replaces all that ugly boilerplate required to
     start up a bot under the TranscribersOfReddit umbrella. This method handles
@@ -257,6 +254,7 @@ def run_until_dead(func, exceptions=default_exceptions):
     :param func: The function that you want to run; this will automatically be
         passed the config object. Historically, this is the only thing needed
         to start a bot.
+    :param config: object; the settings for the bot. This is created
     :param exceptions: A tuple of exception classes to guard against. These are
         a set of PRAW connection errors (timeouts and general connection
         issues) but they can be overridden with a passed-in set.
@@ -282,9 +280,9 @@ def run_until_dead(func, exceptions=default_exceptions):
 
     except KeyboardInterrupt:
         logging.info('User triggered shutdown. Shutting down.')
-        stop_heartbeat(config)
+        stop_heartbeat()
         sys.exit(0)
 
     except Exception as e:
-        stop_heartbeat(config)
+        stop_heartbeat()
         explode_gracefully(e)

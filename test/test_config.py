@@ -2,7 +2,11 @@ import pytest
 
 import redis.exceptions
 
-from tor_core.config import config as SITE_CONFIG
+from tor_core.config import Config as SITE_CONFIG
+from tor_core.config import AudioConfig
+from tor_core.config import VideoConfig
+from tor_core.config import ImageConfig
+from tor_core.config import OtherContentConfig
 
 
 @pytest.mark.skip
@@ -14,21 +18,31 @@ def test_read_secrets_from_filesystem():
 
 
 def test_config_structure():
-    """Config singleton is structured as expected
     """
-    assert isinstance(SITE_CONFIG.video_domains, list)
-    assert isinstance(SITE_CONFIG.audio_domains, list)
-    assert isinstance(SITE_CONFIG.image_domains, list)
+    Config singleton is structured as expected
+    """
+    assert isinstance(SITE_CONFIG.media, dict)
+    assert len(SITE_CONFIG.media) == 4
 
-    assert isinstance(SITE_CONFIG.video_formatting, str)
-    assert isinstance(SITE_CONFIG.audio_formatting, str)
-    assert isinstance(SITE_CONFIG.image_formatting, str)
+    assert isinstance(SITE_CONFIG.media['audio'].domains, list)
+    assert isinstance(SITE_CONFIG.media['audio'], AudioConfig)
+    assert isinstance(SITE_CONFIG.media['audio'].base_format, type(None))
+
+    assert isinstance(SITE_CONFIG.media['video'].domains, list)
+    assert isinstance(SITE_CONFIG.media['video'], VideoConfig)
+    assert isinstance(SITE_CONFIG.media['video'].base_format, type(None))
+
+    assert isinstance(SITE_CONFIG.media['image'].domains, list)
+    assert isinstance(SITE_CONFIG.media['image'], ImageConfig)
+    assert isinstance(SITE_CONFIG.media['image'].base_format, type(None))
+
+    assert isinstance(SITE_CONFIG.media['other'].domains, list)
+    assert isinstance(SITE_CONFIG.media['other'], OtherContentConfig)
+    assert isinstance(SITE_CONFIG.media['other'].base_format, type(None))
 
     assert isinstance(SITE_CONFIG.footer, str)
 
     assert isinstance(SITE_CONFIG.subreddits, list)
-    assert isinstance(SITE_CONFIG.upvote_filter_subs, dict)
-    assert isinstance(SITE_CONFIG.no_link_header_subs, list)
 
     assert isinstance(SITE_CONFIG.mods, list)
 
@@ -52,8 +66,5 @@ def test_redis_config_property():
     except redis.exceptions.ConnectionError:
         pass
 
-    # Check stubbing with derivations of BaseException
-    type(SITE_CONFIG).redis = property(lambda x: (_ for _ in ()).throw(NotImplementedError('Redis was disabled')))
-
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(AttributeError):
         SITE_CONFIG.redis.ping()

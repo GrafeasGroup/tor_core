@@ -1,18 +1,13 @@
+import json
 import logging
 import os
-import random
-import sys
-import json
 
-import redis
 from bugsnag.handlers import BugsnagHandler
 from praw import Reddit
 
-from tor_core.config import config
+from tor_core.config import Config
 from tor_core.config import Subreddit
 from tor_core.heartbeat import configure_heartbeat
-from tor_core.helpers import clean_list
-from tor_core.helpers import get_wiki_page
 from tor_core.helpers import log_header
 
 
@@ -61,6 +56,7 @@ def configure_logging(config, log_name='transcribersofreddit.log'):
         logging.info('Not running with Bugsnag!')
 
     log_header('Starting!')
+    return config
 
 
 def verify_configs(config):
@@ -68,6 +64,7 @@ def verify_configs(config):
     if not os.path.exists(config_location):
         raise Exception('Cannot load configs! Bad path!')
     config.config_location = config_location
+    return config
 
 
 def populate_subreddit_info(config):
@@ -89,6 +86,7 @@ def populate_subreddit_info(config):
                 )
             ) for sub in subbies['subreddits'].keys()
         ]
+    return config
 
 
 def populate_settings(config):
@@ -100,6 +98,11 @@ def populate_settings(config):
         settings = json.load(settings)
 
         config.debug_mode = settings.get('debug_mode', False)
+        for giftype in settings['gifs'].keys():
+            # this will automatically load in every set of gifs under the
+            # heading name. For example, config.gifs.no
+            config.gifs.set(giftype, settings['gifs'][giftype])
+
         config.no_gifs = settings['gifs']['no']
         config.thumbs_up_gifs = settings['gifs']['thumbs_up']
 
@@ -120,47 +123,19 @@ def populate_settings(config):
 
     with open(config.config_location + '/bots/footer.md') as footer:
         config.footer = ''.join(footer.readlines()).strip()
+    return config
 
 
-def initialize(config):
-    verify_configs(config)
+def initialize(temp_config):
+    temp_config = verify_configs(temp_config)
 
-    populate_subreddit_info(config)
+    temp_config = populate_subreddit_info(temp_config)
     logging.info('Subreddit information loaded.')
 
-    populate_settings(config)
+    temp_config = populate_settings(temp_config)
     logging.info('Settings loaded.')
 
-
-def get_heartbeat_port(config):
-    """
-    Attempts to pull an existing port number from the filesystem, and if it
-    doesn't find one then it generates the port number and saves it to a key
-    file.
-
-    :param config: the global config object
-    :return: int; the port number to use.
-    """
-    try:
-        # have we already reserved a port for this process?
-        with open('heartbeat.port', 'r') as port_file:
-            port = int(port_file.readline().strip())
-        logging.debug('Found existing port saved on disk')
-        return port
-    except OSError:
-        pass
-
-    while True:
-        port = random.randrange(40000, 40200)  # is 200 ports too much?
-        if config.redis.sismember('active_heartbeat_ports', port) == 0:
-            config.redis.sadd('active_heartbeat_ports', port)
-
-            # create that file we looked for earlier
-            with open('heartbeat.port', 'w') as port_file:
-                port_file.write(str(port))
-            logging.debug('generated port {} and saved to disk'.format(port))
-
-            return port
+    return temp_config
 
 
 def build_bot(
@@ -187,17 +162,17 @@ def build_bot(
         not have it crash on start because Redis isn't running.
     :param heartbeat_logging: bool; enables extremely verbose logging from
         CherryPy on heartbeat activity.
-    :return: None
+    :return: object; the freshly built config object.
     """
-
+    config = Config()
     config.r = Reddit(name)
     # this is used to power messages, so please add a full name if you can
     config.name = full_name if full_name else name
     config.bot_version = version
     config.heartbeat_logging = heartbeat_logging
-    configure_logging(config, log_name=log_name)
+    config = configure_logging(config, log_name=log_name)
 
-    initialize(config)
+    config = initialize(config)
 
     if require_redis:
         # we want this to run after the config object is created
@@ -205,3 +180,4 @@ def build_bot(
         configure_heartbeat(config)
 
     logging.info('Bot built and initialized!')
+    return config

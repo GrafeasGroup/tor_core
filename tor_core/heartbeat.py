@@ -2,8 +2,6 @@ import logging
 
 import cherrypy
 
-from tor_core.config import config
-
 conf = {
     '/': {
         'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -11,6 +9,8 @@ conf = {
         'tools.response_headers.headers': [('Content-Type', 'application/json')],
     }
 }
+
+global return_data
 
 
 def configure_heartbeat(config):
@@ -30,6 +30,12 @@ def configure_heartbeat(config):
     :param config: the global config object
     :return: None
     """
+    global return_data
+    return_data = {
+        'bot_name': config.name,
+        'bot_version': config.bot_version,
+        'core_version': config.core_version
+    }
 
     # update the global config (separate from the application config above)
     cherrypy.config.update(
@@ -54,11 +60,7 @@ def configure_heartbeat(config):
 class heartbeat(object):
     @cherrypy.tools.json_out()
     def GET(self):
-        return {
-            'bot_name': config.name,
-            'bot_version': config.bot_version,
-            'core_version': config.core_version,
-        }
+        return return_data
 
 
 def start_heartbeat_server():
@@ -72,6 +74,7 @@ def start_heartbeat_server():
     cherrypy.server.socket_host = "127.0.0.1"
     cherrypy.engine.start()
     logging.info('Cherrypy heartbeat started!')
+
 
 def stop_heartbeat_server():
     """

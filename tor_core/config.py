@@ -69,13 +69,6 @@ class BaseConfig(object):
 
         - What is the formatting string for this media?
         - What domains are whitelisted for this media?
-
-    The inheritance model here is for easy type-checking from tests,
-    allowing for validation of an expected interface in a quicker
-    manner.
-
-    Specify overridden values on object instantiation for purposes
-    of testing and by pulling from remote source (e.g., Reddit Wiki)
     """
     def __init__(self, domains=list()):
         self.domains = domains
@@ -130,6 +123,17 @@ class OtherContentConfig(BaseConfig):
         return self.base_format
 
 
+class Gifs(object):
+    """
+    This is just to shove gifs into dynamically. Yay containers!
+    """
+    def set(self, gifset_name, gifset_list):
+        # This way we can just add gifsets willy-nilly in the configs
+        # and they'll all get loaded in with the set name as the
+        # attribute. For example: config.gifs.no == ['gif1.gif', 'gif2.gif'...
+        setattr(self, gifset_name, gifset_list)
+
+
 class Subreddit(praw_subreddit):
     """
     Subreddit base class. Contains all the information needed to handle a
@@ -177,6 +181,8 @@ class Config(object):
         'other': OtherContentConfig(),
     }
 
+    gifs = Gifs()
+
     # List of mods of ToR, fetched later using PRAW
     mods = []
 
@@ -200,6 +206,7 @@ class Config(object):
     # Name of the bot
     name = None
     bot_version = '0.0.0'  # this should get overwritten by the bot process
+    core_version = __version__
     heartbeat_logging = False
 
     @cached_property
@@ -273,7 +280,7 @@ except OSError:
     Config.sentry_api_url = os.environ.get('SENTRY_API_URL', None)
 
 # ----- Compatibility -----
-config = Config()
+# config = Config()
 # config.core_version = __version__
 # config.video_domains = []
 # config.audio_domains = []
