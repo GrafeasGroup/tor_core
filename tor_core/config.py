@@ -2,10 +2,6 @@ import logging
 import os
 import random
 
-from rocketchat_API.rocketchat import RocketChat
-from rocketchat_API.APIExceptions.RocketExceptions import RocketAuthenticationException
-from rocketchat_API.APIExceptions.RocketExceptions import RocketConnectionException
-
 # Load configuration regardless of if bugsnag is setup correctly
 try:
     import bugsnag
@@ -271,25 +267,6 @@ try:
 except OSError:
     Config.modchat_api_url = os.environ.get('MODCHAT_API_URL', None)
 
-if Config.modchat_api_url:
-    # creating the connection is much slower than for slack -- it takes about
-    # a second. Instead of doing that every time we need to send a message,
-    # we'll do it once here and just pass the RocketChat instance around.
-    try:
-        Config.modchat = RocketChat(
-            os.environ.get('MODCHAT_API_USERNAME', None),
-            os.environ.get('MODCHAT_API_PASSWORD', None),
-            Config.modchat_api_url
-        )
-    except RocketAuthenticationException:
-        logging.error(
-            'Modchat authentication failed! Please inspect databag info!'
-        )
-    except RocketConnectionException:
-        logging.error(
-            'Unable to reach Modchat! '
-            'Is there something wrong with the instance?'
-        )
 
 try:
     Config.sentry_api_url = open('sentry.key').readline().strip()
@@ -321,3 +298,5 @@ config.no_gifs = []
 
 # enables debug information for the cherrypy heartbeat server
 config.heartbeat_logging = False
+
+config.modchat = Config.modchat
