@@ -84,7 +84,7 @@ def clean_list(items):
     return cleaned
 
 
-def send_to_modchat(message, config, channel="general"):
+def send_to_modchat(message, config, channel='general'):
     """
     Sends a message to the ToR mod chat.
 

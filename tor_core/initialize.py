@@ -278,12 +278,12 @@ def configure_modchat(config):
             )
         except RocketAuthenticationException:
             logging.error(
-                'Modchat authentication failed! Please inspect databag info!'
+                'Modchat authentication failed. Check username and password!'
             )
         except RocketConnectionException:
             logging.error(
-                'Unable to reach Modchat! '
-                'Is there something wrong with the instance?'
+                'Unable to reach Modchat! Check to make sure your Rocket.Chat '
+                'server specified by MOD_CHAT_URL is available.'
             )
 
 
