@@ -2,6 +2,10 @@ import logging
 import os
 import random
 
+from rocketchat_API.rocketchat import RocketChat
+from rocketchat_API.APIExceptions.RocketExceptions import RocketAuthenticationException
+from rocketchat_API.APIExceptions.RocketExceptions import RocketConnectionException
+
 # Load configuration regardless of if bugsnag is setup correctly
 try:
     import bugsnag
@@ -178,11 +182,13 @@ class Config(object):
 
     # API keys for later overwriting based on contents of filesystem
     bugsnag_api_key = None
-    slack_api_key = None
     sentry_api_url = None
 
     # Templating string for the header of the bot post
     header = ''
+    modchat_api_url = None
+    modchat = None  # the actual modchat instance
+
 
     no_gifs = []
 
@@ -261,9 +267,29 @@ if bugsnag and Config.bugsnag_api_key:
     )
 
 try:
-    Config.slack_api_key = open('slack.key').readline().strip()
+    Config.modchat_api_url = open('modchat.key').readline().strip()
 except OSError:
-    Config.slack_api_key = os.environ.get('SLACK_API_KEY', None)
+    Config.modchat_api_url = os.environ.get('MODCHAT_API_URL', None)
+
+if Config.modchat_api_url:
+    # creating the connection is much slower than for slack -- it takes about
+    # a second. Instead of doing that every time we need to send a message,
+    # we'll do it once here and just pass the RocketChat instance around.
+    try:
+        Config.modchat = RocketChat(
+            os.environ.get('MODCHAT_API_USERNAME', None),
+            os.environ.get('MODCHAT_API_PASSWORD', None),
+            Config.modchat_api_url
+        )
+    except RocketAuthenticationException:
+        logging.error(
+            'Modchat authentication failed! Please inspect databag info!'
+        )
+    except RocketConnectionException:
+        logging.error(
+            'Unable to reach Modchat! '
+            'Is there something wrong with the instance?'
+        )
 
 try:
     Config.sentry_api_url = open('sentry.key').readline().strip()

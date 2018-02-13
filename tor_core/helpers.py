@@ -6,7 +6,7 @@ import time
 
 import praw
 import prawcore
-from slackclient import SlackClient
+import requests
 
 from tor_core import __version__
 from tor_core.config import config
@@ -84,22 +84,19 @@ def clean_list(items):
     return cleaned
 
 
-def send_to_slack(message, config, channel='#general'):
+def send_to_modchat(message, config, channel="general"):
     """
-    Sends a message to the ToR slack.
+    Sends a message to the ToR mod chat.
 
     :param message: String; the message that is to be encoded
-    :param channel: String; channel option, defaults to general
     :param config: the global config dict.
+    :param channel: String; the name of the channel to send to. '#' optional.
     :return: None.
     """
-    if config.slack_api_key:
-        slackc = SlackClient(config.slack_api_key)
-
-        slackc.api_call(
-            'chat.postMessage',
-            channel=channel,
-            text=message
+    if config.modchat:
+        config.modchat.chat_post_message(
+            message,
+            channel=channel
         )
 
     return

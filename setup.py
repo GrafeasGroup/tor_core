@@ -85,6 +85,6 @@ setup(
         'cherrypy',
         'bugsnag',
         'raven',  # Sentry client
-        'slackclient'
+        'rocketchat_API'
     ],
 )
