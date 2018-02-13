@@ -9,6 +9,9 @@ from raven.handlers.logging import SentryHandler
 from raven.conf import setup_logging
 from praw import Reddit
 from raven import Client
+from rocketchat_API.rocketchat import RocketChat
+from rocketchat_API.APIExceptions.RocketExceptions import RocketAuthenticationException
+from rocketchat_API.APIExceptions.RocketExceptions import RocketConnectionException
 
 from tor_core import __HEARTBEAT_FILE__
 from tor_core.config import config
@@ -262,6 +265,28 @@ def get_heartbeat_port(config):
             return port
 
 
+def configure_modchat(config):
+    if config.modchat_api_url:
+        # creating the connection is much slower than for slack -- it takes about
+        # a second. Instead of doing that every time we need to send a message,
+        # we'll do it once here and just pass the RocketChat instance around.
+        try:
+            config.modchat = RocketChat(
+                os.environ.get('MODCHAT_API_USERNAME', None),
+                os.environ.get('MODCHAT_API_PASSWORD', None),
+                server_url=config.modchat_api_url
+            )
+        except RocketAuthenticationException:
+            logging.error(
+                'Modchat authentication failed. Check username and password!'
+            )
+        except RocketConnectionException:
+            logging.error(
+                'Unable to reach Modchat! Check to make sure your Rocket.Chat '
+                'server specified by MOD_CHAT_URL is available.'
+            )
+
+
 def build_bot(
     name,
     version,
@@ -293,6 +318,7 @@ def build_bot(
     config.bot_version = version
     config.heartbeat_logging = heartbeat_logging
     configure_logging(config, log_name=log_name)
+    configure_modchat(config)
 
     if not require_redis:
         # I'm sorry

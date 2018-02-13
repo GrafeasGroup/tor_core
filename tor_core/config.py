@@ -178,11 +178,13 @@ class Config(object):
 
     # API keys for later overwriting based on contents of filesystem
     bugsnag_api_key = None
-    slack_api_key = None
     sentry_api_url = None
 
     # Templating string for the header of the bot post
     header = ''
+    modchat_api_url = None
+    modchat = None  # the actual modchat instance
+
 
     no_gifs = []
 
@@ -261,9 +263,10 @@ if bugsnag and Config.bugsnag_api_key:
     )
 
 try:
-    Config.slack_api_key = open('slack.key').readline().strip()
+    Config.modchat_api_url = open('modchat.key').readline().strip()
 except OSError:
-    Config.slack_api_key = os.environ.get('SLACK_API_KEY', None)
+    Config.modchat_api_url = os.environ.get('MODCHAT_API_URL', None)
+
 
 try:
     Config.sentry_api_url = open('sentry.key').readline().strip()
@@ -295,3 +298,5 @@ config.no_gifs = []
 
 # enables debug information for the cherrypy heartbeat server
 config.heartbeat_logging = False
+
+config.modchat = Config.modchat
