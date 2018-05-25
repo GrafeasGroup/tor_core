@@ -7,6 +7,14 @@ means we will never make a backwards-incompatible change within a major version 
 
 Nothing yet...
 
+## v0.4.3 (2018-05-25)
+
+- Add error handling for sending messages to modchat (@arfie)
+
+## v0.4.2 (2018-02-13)
+
+- Update for generic modchat function and move to rocket.chat (@itsthejoker)
+
 ## v0.4.1 (2017-12-05)
 
 - Heartbeat port filename is read from environment variable to fix concurrency issue with bots (@thelonelyghost)
