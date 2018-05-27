@@ -99,7 +99,7 @@ def send_to_modchat(message, config, channel='general'):
                 message,
                 channel=channel
             )
-        except requests.exceptions.ConnectionError as e:
+        except Exception as e:
             logging.error(f'Failed to send message to modchat #{channel}: '
                           f'\'{message}\'')
             logging.error(e)
