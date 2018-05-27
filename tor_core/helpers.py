@@ -104,8 +104,6 @@ def send_to_modchat(message, config, channel='general'):
                           f'\'{message}\'')
             logging.error(e)
 
-    return
-
 
 def explode_gracefully(error, config):
     """
