@@ -95,9 +95,10 @@ def send_to_modchat(message, config, channel='general'):
     """
     if config.modchat:
         try:
-            config.modchat.chat_post_message(
-                message,
-                channel=channel
+            config.modchat.api_call(
+                'chat.postMessage',
+                channel=channel,
+                text=message
             )
         except Exception as e:
             logging.error(f'Failed to send message to modchat #{channel}: '

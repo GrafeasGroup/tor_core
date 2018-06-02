@@ -7,6 +7,10 @@ means we will never make a backwards-incompatible change within a major version 
 
 Nothing yet...
 
+## v0.5.0 (2018-05-30)
+
+- Migrate modchat provider from rocket.chat back to Slack (@itsthejoker)
+
 ## v0.4.3 (2018-05-25)
 
 - Add error handling for sending messages to modchat (@arfie)
