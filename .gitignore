@@ -12,3 +12,4 @@ heartbeat.port
 *.key
 build/
 dist/
+/.pytest_cache

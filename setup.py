@@ -43,9 +43,12 @@ def long_description():
 test_deps = [
     'pytest',
     'pytest-cov',
+    'sh',
+    'loremipsum',
 ]
 dev_helper_deps = [
     'better-exceptions',
+    'mypy',
 ]
 
 
@@ -78,14 +81,5 @@ setup(
         'dev': test_deps + dev_helper_deps,
     },
     tests_require=test_deps,
-    install_requires=[
-        'praw==5.0.1',
-        'redis<3.0.0',
-        'sh',
-        'cherrypy',
-        'bugsnag',
-        'raven',  # Sentry client
-        'requests',
-        'slackclient'
-    ],
+    install_requires=[],
 )
