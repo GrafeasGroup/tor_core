@@ -81,5 +81,7 @@ setup(
         'dev': test_deps + dev_helper_deps,
     },
     tests_require=test_deps,
-    install_requires=[],
+    install_requires=[
+        'redis<3.0.0',
+    ],
 )
