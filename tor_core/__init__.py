@@ -2,16 +2,42 @@ import os
 
 __version__ = '1.0.0'
 
-__BROKER_URL__ = os.getenv('TASK_BROKER', 'redis://localhost:6379/1')
 
-OUR_BOTS = [
-    'transcribersofreddit',
-    'transcribot',
-    'tor_archivist',
-]
+# ========================
+# | GLOBAL BOT VARIABLES |
+# ========================
 
-ADMIN_COMMAND_PKG = 'tor'
+# This is where we retrieve all the metadata used across all of the bots. We
+# should defer to environment variables to override with sane defaults if no
+# values are given.
 
+# Task broker URL for specifying what backend to configure to hold the queues
+__BROKER_URL__ = os.getenv('TASK_BROKER',
+                           'redis://localhost:6379/1')
+
+# The python module reference where the celery app config is held for the entire
+# network of all running bots. This module should be able to be imported.
+CELERY_CONFIG_MODULE = os.getenv('CELERY_CONFIG_MODULE',
+                                 'tor_worker.celeryconfig')
+
+# Comma-separated values for names of bots we control
+OUR_BOTS = ','.split(os.getenv('TOR_BOT_USERNAMES',
+                               'transcribersofreddit,'
+                               'transcribot,'
+                               'tor_archivist'))
+OUR_BOTS = [name.strip() for name in OUR_BOTS if name.strip()]
+
+# Defaults to look for admin commands in the `tor.admin_commands` module
+ADMIN_COMMAND_PKG = os.getenv('TOR_ADMIN_COMMAND_MODULE',
+                              'tor')
+
+
+# ===================
+# | Default Objects |
+# ===================
+
+# These are objects which should be used almost as if they are a part of the
+# Python standard library
 
 _missing = object()
 
