@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import datetime
 
 # Load configuration regardless of if bugsnag is setup correctly
 try:
@@ -185,7 +186,6 @@ class Config(object):
     modchat_api_url = None
     modchat = None  # the actual modchat instance
 
-
     no_gifs = []
 
     perform_header_check = True
@@ -203,6 +203,8 @@ class Config(object):
     name = None
     bot_version = '0.0.0'  # this should get overwritten by the bot process
     heartbeat_logging = False
+
+    last_post_scan_time = datetime.datetime(1970, 1, 1, 1, 1, 1)
 
     @cached_property
     def redis(self):
