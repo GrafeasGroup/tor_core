@@ -19,9 +19,9 @@ __BROKER_URL__ = os.getenv("TASK_BROKER", "redis://localhost:6379/1")
 CELERY_CONFIG_MODULE = os.getenv("CELERY_CONFIG_MODULE", "tor_worker.celeryconfig")
 
 # Comma-separated values for names of bots we control
-OUR_BOTS = ",".split(
-    os.getenv("TOR_BOT_USERNAMES", "transcribersofreddit,transcribot,tor_archivist")
-)
+OUR_BOTS = os.getenv(
+    "TOR_BOT_USERNAMES", "transcribersofreddit,transcribot,tor_archivist"
+).split(",")
 OUR_BOTS = [name.strip() for name in OUR_BOTS if name.strip()]
 
 # Defaults to look for admin commands in the `tor.admin_commands` module
