@@ -44,6 +44,14 @@ css_flair.in_progress = 'inprogress'
 css_flair.meta = 'meta'
 css_flair.disregard = 'disregard'
 
+reports = Object()
+reports.original_post_deleted_or_locked = (
+    'Original post has been deleted or locked'
+)
+reports.post_should_be_marked_nsfw = 'Post should be marked as NSFW'
+reports.no_bot_accounts = 'No bot accounts but our own'
+reports.post_violates_rules = 'Post Violates Rules on Partner Subreddit'
+
 # error message for an API timeout
 _pattern = re.compile('again in (?P<number>[0-9]+) (?P<unit>\w+)s?\.$',
                       re.IGNORECASE)
